@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CRM DYD · Arena</title>
-<script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -54,6 +53,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .lbl{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px}
 .form-group{margin-bottom:14px}
 select.inp option{background:#1E2133}
+textarea.inp{resize:vertical;min-height:72px;line-height:1.5}
 
 .btn-p{background:var(--accent);color:#000;font-weight:700;font-size:15px;border:none;border-radius:12px;padding:14px 24px;width:100%;cursor:pointer;transition:opacity .18s}
 .btn-p:active{opacity:.8}
@@ -86,6 +86,7 @@ select.inp option{background:#1E2133}
 .seg-u{background:var(--orange-dim);border-color:var(--border);border-left-color:var(--orange)}
 .seg-p{background:var(--warn-dim);border-color:var(--border);border-left-color:var(--warn)}
 .seg-o{background:var(--green-dim);border-color:var(--border);border-left-color:var(--green)}
+.seg-r{background:rgba(129,140,248,.1);border-color:var(--border);border-left-color:#818CF8}
 
 .stat-g{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px 4px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center}
@@ -113,6 +114,32 @@ select.inp option{background:#1E2133}
 #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;z-index:999;display:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 #toast.show{display:block;animation:toastIn .3s ease}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ── AUTOCOMPLETE CLIENTE (Ventas) ── */
+.ac-wrap{position:relative}
+.ac-list{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;z-index:300;max-height:230px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.ac-list.open{display:block}
+.ac-item{padding:11px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--border)}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item:active{background:var(--accent-dim)}
+.ac-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.cli-sel-box{display:flex;justify-content:space-between;align-items:center;background:var(--accent-dim);border:1px solid var(--accent);border-radius:10px;padding:11px 14px;font-size:14px;font-weight:600}
+.cli-sel-clear{background:none;border:none;color:var(--danger);font-size:20px;cursor:pointer;padding:0;line-height:1;margin-left:8px}
+
+/* ── TRAMO SELECT ── */
+.tramo-sel{background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--accent);font-weight:700;font-size:13px;padding:3px 8px;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none}
+.tramo-sel:focus{border-color:var(--accent)}
+
+/* ── BOTÓN EDITAR NOTA (tarjeta cliente) ── */
+.btn-nota-edit{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 9px;cursor:pointer;color:var(--muted);font-size:17px;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;line-height:1}
+.btn-nota-edit:hover,.btn-nota-edit:active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+/* ── RECORDATORIO ── */
+.rec-chip{display:inline-flex;align-items:center;gap:5px;border-radius:100px;padding:3px 10px;font-size:11px;font-weight:700}
+.rec-hoy{background:rgba(255,181,71,.2);color:var(--warn)}
+.rec-fut{background:rgba(0,201,167,.12);color:var(--accent)}
+.rec-venc{background:var(--danger-dim);color:var(--danger)}
+.nota-edit-box{margin-bottom:16px;padding:14px;background:var(--bg);border-radius:12px;border:1px solid var(--accent)}
 </style>
 </head>
 <body>
@@ -123,18 +150,18 @@ select.inp option{background:#1E2133}
   <!-- DASHBOARD -->
   <div class="page active" id="p-dash">
     <div class="page-title">Dashboard <span style="font-size:14px;font-weight:400;color:var(--muted)" id="dash-date"></span></div>
-    <div class="page-sub" id="dash-sub">Cargando métricas desde Sheets...</div>
+    <div class="page-sub" id="dash-sub">Cargando...</div>
     <div class="stat-g" id="stat-grid">
-      <div class="stat-card"><div class="loading-state"><span class="spinner"></span></div></div>
-      <div class="stat-card"><div class="loading-state"><span class="spinner"></span></div></div>
-      <div class="stat-card"><div class="loading-state"><span class="spinner"></span></div></div>
+      <div class="stat-card"><div class="stat-n" style="color:var(--green)">—</div><div class="stat-l">Activos</div></div>
+      <div class="stat-card"><div class="stat-n" style="color:var(--warn)">—</div><div class="stat-l">Atención</div></div>
+      <div class="stat-card"><div class="stat-n" style="color:var(--danger)">—</div><div class="stat-l">Inactivos</div></div>
     </div>
     <div class="section-label">Resumen de cartera</div>
-    <div class="px16" id="dash-cartera"><div class="loading-state"><span class="spinner"></span>Conectando con Google Sheets...</div></div>
+    <div class="px16" id="dash-cartera"><div class="loading-state"><span class="spinner"></span>Cargando...</div></div>
     <div class="section-label">Últimas ventas</div>
-    <div class="px16" id="dash-ventas"></div>
+    <div class="px16" id="dash-ventas"><div class="loading-state"><span class="spinner"></span>Cargando ventas...</div></div>
     <div class="section-label">Pipeline B2B</div>
-    <div class="px16" id="dash-pipeline"></div>
+    <div class="px16" id="dash-pipeline"><div class="loading-state"><span class="spinner"></span>Cargando pipeline...</div></div>
     <div style="height:16px"></div>
   </div>
 
@@ -144,7 +171,7 @@ select.inp option{background:#1E2133}
       <div class="page-title">Clientes</div>
       <div class="search-wrap">
         <i class="ph-bold ph-magnifying-glass search-icon"></i>
-        <input class="inp" id="cli-search" placeholder="Buscar cliente..." oninput="renderClientes()">
+        <input class="inp" id="cli-search" placeholder="Buscar por nombre, producto o comuna..." oninput="renderClientes()">
       </div>
       <div class="chips">
         <div class="chip active" onclick="setFilter('todos',this)">Todos</div>
@@ -152,6 +179,7 @@ select.inp option{background:#1E2133}
         <div class="chip" onclick="setFilter('atencion',this)">Atención</div>
         <div class="chip" onclick="setFilter('inactivo',this)">Inactivos</div>
         <div class="chip" onclick="setFilter('sindatos',this)">Sin fecha</div>
+        <div class="chip" onclick="setFilter('recordatorio',this)">🔔 Recordatorios</div>
       </div>
     </div>
     <div class="px16" id="cli-list"><div class="loading-state"><span class="spinner"></span>Cargando clientes...</div></div>
@@ -163,6 +191,7 @@ select.inp option{background:#1E2133}
     <div class="page-title">Seguimiento</div>
     <div class="page-sub">Contactos priorizados por urgencia</div>
     <div id="seg-alert-bar" class="px16" style="margin-bottom:12px"></div>
+    <div id="seg-rec-bar" class="px16" style="margin-bottom:4px"></div>
     <div class="px16" id="seg-list"><div class="loading-state"><span class="spinner"></span>Cargando...</div></div>
   </div>
 
@@ -177,21 +206,40 @@ select.inp option{background:#1E2133}
           <label class="lbl">Fecha</label>
           <input type="date" id="v-fecha" class="inp">
         </div>
+
+        <!-- BUSCADOR DE CLIENTE MEJORADO -->
         <div class="form-group">
           <label class="lbl">Cliente</label>
-          <select id="v-cliente" class="inp" onchange="toggleClienteNuevo()">
-            <option value="">— Seleccionar —</option>
-          </select>
+          <div class="ac-wrap" id="v-cli-wrap">
+            <input class="inp" id="v-cli-search"
+              placeholder="Escribe para buscar cliente..."
+              oninput="filterVentaClientes()"
+              onfocus="filterVentaClientes()"
+              autocomplete="off">
+            <div class="ac-list" id="v-cli-dropdown"></div>
+          </div>
+          <!-- cliente seleccionado -->
+          <div id="v-cli-selected" style="display:none;margin-top:8px">
+            <div class="cli-sel-box">
+              <span id="v-cli-sel-name" style="flex:1"></span>
+              <button class="cli-sel-clear" onclick="clearVentaCliente()" title="Cambiar cliente">×</button>
+            </div>
+          </div>
+          <!-- campo nombre nuevo -->
+          <div id="campo-cliente-nuevo" style="display:none;margin-top:8px">
+            <input class="inp" id="v-cliente-nuevo" placeholder="Nombre del cliente nuevo">
+          </div>
+          <!-- valor real (hidden) -->
+          <input type="hidden" id="v-cliente" value="">
         </div>
-        <div class="form-group" id="campo-cliente-nuevo" style="display:none">
-          <label class="lbl">Nombre del cliente nuevo</label>
-          <input class="inp" id="v-cliente-nuevo" placeholder="Escribe el nombre completo">
-        </div>
+
         <div class="form-group">
           <label class="lbl">Producto</label>
           <select id="v-producto" class="inp">
-            <option>Arena Premium</option><option>Arena Premium Cafe</option>
-            <option>Arena Premium Limon</option><option>Sacos 20kg Cafe</option>
+            <option>Arena Premium</option>
+            <option>Arena Premium Cafe</option>
+            <option>Arena Premium Limon</option>
+            <option>Sacos 20kg Cafe</option>
           </select>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -201,7 +249,7 @@ select.inp option{background:#1E2133}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div class="form-group"><label class="lbl">Costo Unit ($)</label><input type="number" id="v-costo" class="inp" value="11500" oninput="calcVenta()"></div>
           <div class="form-group"><label class="lbl">Comuna</label>
-            <select id="v-comuna" class="inp" onchange="calcVenta()">
+            <select id="v-comuna" class="inp" onchange="autoSetTramo();calcVenta()">
               <option>Quilpué</option><option>Villa Alemana</option>
               <option>Viña del Mar</option><option>Valparaíso (Centro/Plan)</option>
               <option>Concón</option><option>Reñaca</option>
@@ -209,13 +257,28 @@ select.inp option{background:#1E2133}
             </select>
           </div>
         </div>
+
+        <!-- RESUMEN CON TRAMO EDITABLE -->
         <div class="card-sm" style="background:var(--bg);margin-bottom:14px">
-          <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted)"><span>Tramo</span><span id="pv-tramo" style="color:var(--accent);font-weight:700">—</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:6px"><span>Costo flete</span><span id="pv-flete" style="font-weight:700">—</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)">
+            <span>Tramo</span>
+            <select id="pv-tramo" class="tramo-sel" onchange="onTramoChange()" title="Puedes cambiar el tramo manualmente">
+              <option value="Local">Local</option>
+              <option value="Intermedio">Intermedio</option>
+              <option value="Extendido">Extendido</option>
+              <option value="Manual">✏️ Manual</option>
+            </select>
+          </div>
+          <!-- Flete manual: visible solo cuando tramo = Manual -->
+          <div id="pv-flete-manual-wrap" style="display:none;margin-top:8px">
+            <input type="number" id="pv-flete-manual" class="inp" placeholder="Ingresa costo de flete ($)" min="0" oninput="calcVenta()" style="font-size:14px;padding:9px 12px">
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:8px"><span>Costo flete</span><span id="pv-flete" style="font-weight:700">—</span></div>
           <div class="divider"></div>
           <div style="display:flex;justify-content:space-between;font-size:15px"><span>Total venta</span><strong id="pv-total">—</strong></div>
           <div style="display:flex;justify-content:space-between;font-size:15px;margin-top:6px"><span>Ganancia</span><strong id="pv-gan" style="color:var(--green)">—</strong></div>
         </div>
+
         <button class="btn-p" id="btn-guardar-venta" onclick="guardarVenta()">Registrar Venta en Sheets</button>
       </div>
     </div>
@@ -272,6 +335,15 @@ select.inp option{background:#1E2133}
       <div class="form-group"><label class="lbl">Frec. (días)</label><input class="inp" id="nc-frec" value="30" type="number"></div>
     </div>
     <div class="form-group"><label class="lbl">Última compra</label><input class="inp" id="nc-fecha" type="date"></div>
+    <!-- ★ NUEVOS CAMPOS -->
+    <div class="form-group">
+      <label class="lbl">📋 Observaciones</label>
+      <textarea class="inp" id="nc-obs" placeholder="Preferencias, notas de entrega, mascota, etc." rows="3"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="lbl">🔔 Recordatorio de llamada</label>
+      <input class="inp" id="nc-rec" type="date">
+    </div>
     <button class="btn-p" id="btn-guardar-cli" onclick="guardarCliente()">Guardar en Sheets</button>
     <button class="btn-s" style="margin-top:8px" onclick="closeModal('m-addcli')">Cancelar</button>
   </div>
@@ -300,23 +372,46 @@ select.inp option{background:#1E2133}
   </div>
 </div>
 
+<!-- MODAL: Editar observación + recordatorio de cliente existente -->
+<div class="modal-ov" id="m-editnota">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="en-titulo" style="font-size:18px;font-weight:800;margin-bottom:2px"></div>
+    <div id="en-sub" style="font-size:13px;color:var(--muted);margin-bottom:16px"></div>
+    <div class="form-group">
+      <label class="lbl">📋 Observaciones</label>
+      <textarea class="inp" id="en-obs" rows="4" style="resize:vertical" placeholder="Preferencias, mascota, notas de entrega..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="lbl">🔔 Recordatorio de llamada</label>
+      <input class="inp" id="en-rec" type="date">
+      <div style="font-size:11px;color:var(--muted);margin-top:5px">Dejá vacío para quitar el recordatorio</div>
+    </div>
+    <button class="btn-p" id="btn-guardar-nota" onclick="guardarEditNota()">Guardar</button>
+    <button class="btn-s" style="margin-top:8px" onclick="closeModal('m-editnota')">Cancelar</button>
+  </div>
+</div>
+
 <!-- MODAL: Editar pipeline -->
 <div class="modal-ov" id="m-editpip"><div class="modal-sheet" id="m-editpip-body"><div class="modal-handle"></div></div></div>
 
 <script>
 // ═══════════════════════════════════════════════
-// CONFIGURACIÓN — URL de tu Apps Script
+// CONFIGURACIÓN
 // ═══════════════════════════════════════════════
 const API = 'https://script.google.com/macros/s/AKfycbwg15wVGvEp98Aq1S0OnafmISuSz_fqpXDmq9q8gTcIJyL-tUafIHof99ZntkLhYVGBTg/exec';
 
-// ═══════════════════════════════════════════════
-// CACHE local (evita recargas innecesarias)
-// ═══════════════════════════════════════════════
+// Cache local
 let CACHE = { clientes: null, ventas: null, pipeline: null };
+
+// ★ NOTAS LOCALES (observaciones + recordatorios de clientes existentes)
+// Persisten durante la sesión; se pierden al recargar (hasta que el backend lo soporte)
+window._localNotes = {};
+function getLocalNote(nombre) { return window._localNotes[nombre] || {}; }
+function setLocalNote(nombre, obs, rec) { window._localNotes[nombre] = { obs, rec }; }
 
 async function api(params) {
   const target = API + '?' + new URLSearchParams(params).toString();
-  // Intentar proxy propio primero, luego fallbacks
   const urls = [
     '/api/proxy?' + new URLSearchParams(params).toString(),
     'https://api.allorigins.win/raw?url=' + encodeURIComponent(target),
@@ -324,9 +419,9 @@ async function api(params) {
   ];
   for (const url of urls) {
     try {
-      const res = await fetch(url, {redirect:'follow'});
+      const res = await fetch(url, { redirect: 'follow' });
       const text = await res.text();
-      if (text && (text.trim()[0]==='[' || text.trim()[0]==='{')) return JSON.parse(text);
+      if (text && (text.trim()[0] === '[' || text.trim()[0] === '{')) return JSON.parse(text);
     } catch(e) { continue; }
   }
   throw new Error('Sin conexión con Sheets');
@@ -359,8 +454,8 @@ const TRAMOS = {
   'Viña del Mar':'Intermedio','Valparaíso (Centro/Plan)':'Intermedio',
   'Concón':'Extendido','Reñaca':'Extendido','Valparaíso (Playa Ancha/Curauma)':'Extendido'
 };
-const FLETE = {Local:2500,Intermedio:4500,Extendido:6500};
-const FLETE_GRATIS = {Local:100000,Intermedio:180000,Extendido:250000};
+const FLETE = { Local:2500, Intermedio:4500, Extendido:6500 };
+const FLETE_GRATIS = { Local:100000, Intermedio:180000, Extendido:250000 };
 
 function diasSin(uc) {
   if (!uc) return 999;
@@ -383,9 +478,8 @@ function alerta(ds, frec) {
   return 'ok';
 }
 function tramoFn(comuna) { return TRAMOS[comuna] || 'Local'; }
-function fleteFn(comuna, total) {
-  const t = tramoFn(comuna);
-  return total >= FLETE_GRATIS[t] ? 0 : FLETE[t] || 0;
+function fleteFn(tramo, total) {
+  return total >= (FLETE_GRATIS[tramo] || 100000) ? 0 : (FLETE[tramo] || 0);
 }
 function clp(n) { return '$' + Math.round(n || 0).toLocaleString('es-CL'); }
 function initials(n) { return (n||'?').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase(); }
@@ -406,17 +500,38 @@ function urgOrder(c) {
   const m = {vencido:0,urgente:1,pronto:2,ok:3,sindatos:4};
   return m[alerta(diasSin(uc), frec)] ?? 5;
 }
-function getNombre(c) { return c['CLIENTE'] || c.nombre || ''; }
-function getWA(c) { return c['WHATSAPP'] || c.whatsapp || ''; }
-function getProducto(c) { return c['PRODUCTO'] || c.producto || ''; }
-function getComuna(c) { return c['COMUNA'] || c.comuna || ''; }
-function getUltimaCompra(c) { return c['FECHA ÚLT. COMPRA'] || c.ultima_compra || ''; }
-function getFrecuencia(c) { return parseInt(c['FREC.\n(DÍAS)'] || c.FRECUENCIA || 30); }
-function getPrecioUnit(c) { return parseFloat(c['PRECIO\nUNIT. ($)'] || c.precio_unit || 17500); }
-function getCostoUnit(c) { return parseFloat(c['COSTO\nUNIT. ($)'] || c.costo_unit || 11500); }
-function getCanal(c) { return c['CANAL'] || c.canal || ''; }
-function getDireccion(c) { return c['DIRECCIÓN'] || c.direccion || ''; }
-function getId(c) { return c['ID'] || c['#'] || c.id || 0; }
+function getNombre(c)      { return c['CLIENTE'] || c.nombre || ''; }
+function getWA(c)          { return c['WHATSAPP'] || c.whatsapp || ''; }
+function getProducto(c)    { return c['PRODUCTO'] || c.producto || ''; }
+function getComuna(c)      { return c['COMUNA'] || c.comuna || ''; }
+function getUltimaCompra(c){ return c['FECHA ÚLT. COMPRA'] || c.ultima_compra || ''; }
+function getFrecuencia(c)  { return parseInt(c['FREC.\n(DÍAS)'] || c.FRECUENCIA || 30); }
+function getPrecioUnit(c)  { return parseFloat(c['PRECIO\nUNIT. ($)'] || c.precio_unit || 17500); }
+function getCostoUnit(c)   { return parseFloat(c['COSTO\nUNIT. ($)'] || c.costo_unit || 11500); }
+function getCanal(c)       { return c['CANAL'] || c.canal || ''; }
+function getDireccion(c)   { return c['DIRECCIÓN'] || c.direccion || ''; }
+function getId(c)          { return c['ID'] || c['#'] || c.id || 0; }
+// ★ NUEVOS GETTERS
+function getObservaciones(c){ return c['OBSERVACIONES'] || c.observaciones || ''; }
+function getRecordatorio(c) { return c['RECORDATORIO'] || c.recordatorio || ''; }
+
+// Recordatorio efectivo (local notes tienen prioridad sobre Sheets)
+function getRecEfectivo(c) {
+  const nombre = getNombre(c);
+  const ln = getLocalNote(nombre);
+  return ln.rec !== undefined ? ln.rec : getRecordatorio(c);
+}
+function getObsEfectiva(c) {
+  const nombre = getNombre(c);
+  const ln = getLocalNote(nombre);
+  return ln.obs !== undefined ? ln.obs : getObservaciones(c);
+}
+
+// Chequear si un cliente tiene recordatorio vencido/hoy
+function tieneRecordatorioPendiente(c) {
+  const rec = getRecEfectivo(c);
+  return rec && rec <= today();
+}
 
 // Toast
 function toast(msg, color='var(--accent)') {
@@ -455,16 +570,23 @@ document.querySelectorAll('.modal-ov').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
 });
 
-// Badge urgencias
+// Cerrar autocomplete al click fuera
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('v-cli-wrap');
+  const dd = document.getElementById('v-cli-dropdown');
+  if (wrap && dd && !wrap.contains(e.target)) dd.classList.remove('open');
+});
+
+// ★ Badge: urgencias + recordatorios pendientes
 async function updateBadge() {
   try {
     const clientes = await getClientes();
-    const urgentes = clientes.filter(c => {
+    const n = clientes.filter(c => {
       const a = alerta(diasSin(getUltimaCompra(c)), getFrecuencia(c));
-      return a === 'vencido' || a === 'urgente';
+      return a === 'vencido' || a === 'urgente' || tieneRecordatorioPendiente(c);
     }).length;
     const badge = document.getElementById('seg-badge');
-    if (urgentes > 0) { badge.style.display = ''; badge.textContent = urgentes; }
+    if (n > 0) { badge.style.display = ''; badge.textContent = n; }
     else badge.style.display = 'none';
   } catch(e) {}
 }
@@ -475,16 +597,14 @@ async function updateBadge() {
 async function renderDash() {
   document.getElementById('dash-date').textContent =
     new Date().toLocaleDateString('es-CL', {weekday:'long',day:'numeric',month:'long'});
-
   try {
     const [clientes, ventas, pipeline] = await Promise.all([getClientes(), getVentas(), getPipeline()]);
-
-    const activos = clientes.filter(c => estado(diasSin(getUltimaCompra(c))) === 'activo').length;
-    const atencion = clientes.filter(c => estado(diasSin(getUltimaCompra(c))) === 'atencion').length;
+    const activos   = clientes.filter(c => estado(diasSin(getUltimaCompra(c))) === 'activo').length;
+    const atencion  = clientes.filter(c => estado(diasSin(getUltimaCompra(c))) === 'atencion').length;
     const inactivos = clientes.filter(c => estado(diasSin(getUltimaCompra(c))) === 'inactivo').length;
-    const urgentes = clientes.filter(c => {
+    const urgentes  = clientes.filter(c => {
       const a = alerta(diasSin(getUltimaCompra(c)), getFrecuencia(c));
-      return a === 'vencido' || a === 'urgente';
+      return a === 'vencido' || a === 'urgente' || tieneRecordatorioPendiente(c);
     }).length;
 
     document.getElementById('stat-grid').innerHTML = `
@@ -498,11 +618,11 @@ async function renderDash() {
     const mesActual = new Date().toISOString().slice(0,7);
     const ventasMes = ventas.filter(v => (v['FECHA'] || '').startsWith(mesActual));
     const ingresoMes = ventasMes.reduce((s,v) => s + parseFloat(v['MONTO ($)'] || 0), 0);
-    const ganMes = ventasMes.reduce((s,v) => s + parseFloat(v['GANANCIA ($)'] || 0), 0);
-    const pipVal = pipeline.filter(p => p['ETAPA'] !== 'cliente')
-      .reduce((s,p) => s + (parseFloat(p['SACOS']||0) * parseFloat(p['PRECIO_UNIT']||0)), 0);
-    const pipCli = pipeline.filter(p => p['ETAPA'] === 'cliente')
-      .reduce((s,p) => s + (parseFloat(p['SACOS']||0) * parseFloat(p['PRECIO_UNIT']||0)), 0);
+    const ganMes     = ventasMes.reduce((s,v) => s + parseFloat(v['GANANCIA ($)'] || 0), 0);
+    const pipVal = pipeline.filter(p=>p['ETAPA']!=='cliente')
+      .reduce((s,p)=>s+(parseFloat(p['SACOS']||0)*parseFloat(p['PRECIO_UNIT']||0)),0);
+    const pipCli = pipeline.filter(p=>p['ETAPA']==='cliente')
+      .reduce((s,p)=>s+(parseFloat(p['SACOS']||0)*parseFloat(p['PRECIO_UNIT']||0)),0);
 
     document.getElementById('dash-cartera').innerHTML = `
       <div class="card" style="padding:14px">
@@ -528,8 +648,8 @@ async function renderDash() {
     document.getElementById('dash-ventas').innerHTML = ultVentas.length ? ultVentas.map(v => `
       <div class="card-sm" style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div style="font-size:14px;font-weight:600">${v['CLIENTE'] || '—'}</div>
-          <div style="font-size:12px;color:var(--muted)">${v['PRODUCTO'] || ''} · ${formatDate(v['FECHA'])}</div>
+          <div style="font-size:14px;font-weight:600">${v['CLIENTE']||'—'}</div>
+          <div style="font-size:12px;color:var(--muted)">${v['PRODUCTO']||''} · ${formatDate(v['FECHA'])}</div>
         </div>
         <div style="text-align:right">
           <div style="font-size:14px;font-weight:700;color:var(--accent)">${clp(v['MONTO ($)'])}</div>
@@ -564,14 +684,23 @@ async function renderClientes() {
   try {
     const clientes = await getClientes();
     const q = (document.getElementById('cli-search').value || '').toLowerCase();
+
     let list = clientes.filter(c => {
       const ds = diasSin(getUltimaCompra(c));
       const e = estado(ds);
-      if (currentFilter !== 'todos' && e !== currentFilter) return false;
-      const n = getNombre(c).toLowerCase();
-      const p = getProducto(c).toLowerCase();
-      const co = getComuna(c).toLowerCase();
-      if (q && !n.includes(q) && !p.includes(q) && !co.includes(q)) return false;
+      // Filtro especial: recordatorios pendientes
+      if (currentFilter === 'recordatorio') {
+        if (!tieneRecordatorioPendiente(c)) return false;
+      } else if (currentFilter !== 'todos' && e !== currentFilter) {
+        return false;
+      }
+      if (q) {
+        const n   = getNombre(c).toLowerCase();
+        const p   = getProducto(c).toLowerCase();
+        const co  = getComuna(c).toLowerCase();
+        const obs = getObsEfectiva(c).toLowerCase();
+        if (!n.includes(q) && !p.includes(q) && !co.includes(q) && !obs.includes(q)) return false;
+      }
       return true;
     }).sort((a,b) => urgOrder(a) - urgOrder(b));
 
@@ -579,19 +708,26 @@ async function renderClientes() {
 
     el.innerHTML = list.map((c,i) => {
       const ds = diasSin(getUltimaCompra(c));
-      const e = estado(ds);
-      const a = alerta(ds, getFrecuencia(c));
+      const e  = estado(ds);
+      const a  = alerta(ds, getFrecuencia(c));
       const nombre = getNombre(c);
-      const av = avatarColor(nombre);
+      const av  = avatarColor(nombre);
       const ini = initials(nombre);
       const eLabel = {activo:'Activo',atencion:'Atención',inactivo:'Inactivo',sindatos:'Sin fecha'}[e] || e;
       const aLabel = {vencido:'Vencido',urgente:'Urgente',pronto:'Pronto',ok:'OK',sindatos:'—'}[a] || a;
+      const rec = getRecEfectivo(c);
+      const recBadge = rec ? (rec <= today() ? `<span class="rec-chip rec-hoy" style="display:inline-flex;margin-top:4px">🔔 Hoy</span>` : `<span class="rec-chip rec-fut" style="display:inline-flex;margin-top:4px">🔔 ${formatDate(rec)}</span>`) : '';
       return `<div class="card" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:12px" onclick="openDetalle(${i})">
         <div style="width:44px;height:44px;border-radius:50%;background:${av}22;border:2px solid ${av};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:${av};flex-shrink:0">${ini}</div>
         <div style="flex:1;min-width:0">
           <div style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nombre}</div>
           <div style="font-size:12px;color:var(--muted);margin-top:2px">${getProducto(c)} · ${getComuna(c)}</div>
+          ${recBadge}
         </div>
+        <!-- ★ BOTÓN EDITAR NOTA -->
+        <button class="btn-nota-edit" onclick="event.stopPropagation();openEditNota(${i})" title="Editar observación y recordatorio">
+          <i class="ph-bold ph-note-pencil"></i>
+        </button>
         <div style="text-align:right;flex-shrink:0">
           <span class="badge b-${e}" style="margin-bottom:4px;display:inline-block">${eLabel}</span><br>
           <span class="badge b-${a}" style="font-size:10px">${aLabel}</span>
@@ -599,7 +735,6 @@ async function renderClientes() {
       </div>`;
     }).join('');
 
-    // guardar lista filtrada para openDetalle
     window._cliList = list;
   } catch(err) {
     el.innerHTML = `<div class="empty"><i class="ph-bold ph-wifi-slash"></i>Error: ${err.message}</div>`;
@@ -610,18 +745,33 @@ function openDetalle(idx) {
   const c = (window._cliList || [])[idx];
   if (!c) return;
   const nombre = getNombre(c);
-  const ds = diasSin(getUltimaCompra(c));
-  const e = estado(ds);
-  const a = alerta(ds, getFrecuencia(c));
-  const av = avatarColor(nombre);
-  const ini = initials(nombre);
-  const t = tramoFn(getComuna(c));
-  const pu = getPrecioUnit(c);
-  const cu = getCostoUnit(c);
+  const ds   = diasSin(getUltimaCompra(c));
+  const e    = estado(ds);
+  const a    = alerta(ds, getFrecuencia(c));
+  const av   = avatarColor(nombre);
+  const ini  = initials(nombre);
+  const t    = tramoFn(getComuna(c));
+  const pu   = getPrecioUnit(c);
+  const cu   = getCostoUnit(c);
   const diasAlProx = getFrecuencia(c) - ds;
-  const ltv = parseFloat(c['LTV\nTOTAL ($)'] || c.LTV || 0);
+  const ltv  = parseFloat(c['LTV\nTOTAL ($)'] || c.LTV || 0);
   const vecesComprado = c['VECES COMPRADO'] || '—';
-  const wa = getWA(c);
+  const wa   = getWA(c);
+
+  // Observaciones y recordatorio (local notes tienen prioridad)
+  const obs  = getObsEfectiva(c);
+  const rec  = getRecEfectivo(c);
+
+  let recHtml = '';
+  if (!rec) {
+    recHtml = `<span style="color:var(--muted)">Sin recordatorio</span>`;
+  } else if (rec < today()) {
+    recHtml = `<span class="rec-chip rec-venc">🔔 Vencido · ${formatDate(rec)}</span>`;
+  } else if (rec === today()) {
+    recHtml = `<span class="rec-chip rec-hoy">🔔 HOY · ${formatDate(rec)}</span>`;
+  } else {
+    recHtml = `<span class="rec-chip rec-fut">🔔 ${formatDate(rec)}</span>`;
+  }
 
   document.getElementById('m-detail-body').innerHTML = `
     <div class="modal-handle"></div>
@@ -647,10 +797,23 @@ function openDetalle(idx) {
       <div style="font-weight:600">${getProducto(c)}</div>
       <div style="font-size:12px;color:var(--muted);margin-top:8px">Precio: <strong>${clp(pu)}</strong> · Margen: <strong style="color:var(--green)">${clp(pu-cu)}</strong>${ltv?` · LTV: <strong style="color:var(--accent)">${clp(ltv)}</strong>`:''}</div>
     </div>
-    <div class="card-sm" style="background:var(--bg);margin-bottom:16px">
+    <div class="card-sm" style="background:var(--bg);margin-bottom:12px">
       <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;margin-bottom:4px">Dirección</div>
       <div style="font-size:14px">${getDireccion(c) || '—'}</div>
     </div>
+
+    <!-- ★ OBSERVACIONES Y RECORDATORIO -->
+    <div class="card-sm" style="background:var(--bg);margin-bottom:12px" id="nota-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700">📋 Observaciones</div>
+        <button class="btn-sm" style="font-size:11px;padding:4px 10px;border-color:var(--accent);color:var(--accent)" onclick="editarNotaCliente('${nombre.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">✏️ Editar</button>
+      </div>
+      <div style="font-size:13px;color:${obs?'var(--text)':'var(--muted)'};white-space:pre-wrap;line-height:1.5">${obs || 'Sin observaciones registradas'}</div>
+      <div class="divider"></div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;margin-bottom:6px">🔔 Recordatorio de llamada</div>
+      <div style="font-size:14px">${recHtml}</div>
+    </div>
+
     <div style="display:flex;gap:10px;margin-bottom:10px">
       ${wa && wa.length > 5 ? `<a href="${waLink(wa)}" target="_blank" style="flex:1"><button class="btn-wa" style="width:100%;justify-content:center"><i class="ph-bold ph-whatsapp-logo"></i> WhatsApp</button></a>` : '<button class="btn-sm" style="flex:1;opacity:.4" disabled>Sin WhatsApp</button>'}
       <button class="btn-accent-sm" style="flex:1" onclick="marcarContactado('${nombre.replace(/'/g,"\\'")}')">✓ Contactado hoy</button>
@@ -658,6 +821,122 @@ function openDetalle(idx) {
     <button class="btn-s" onclick="closeModal('m-detail')">Cerrar</button>
   `;
   openModal('m-detail');
+}
+
+// ★ Abrir modal de edición desde la tarjeta de la lista
+let _editNotaNombre = '';
+function openEditNota(idx) {
+  const c = (window._cliList || [])[idx];
+  if (!c) return;
+  _editNotaNombre = getNombre(c);
+  document.getElementById('en-titulo').textContent = _editNotaNombre;
+  document.getElementById('en-sub').textContent = getProducto(c) + ' · ' + getComuna(c);
+  document.getElementById('en-obs').value = getObsEfectiva(c);
+  document.getElementById('en-rec').value  = getRecEfectivo(c);
+  openModal('m-editnota');
+}
+
+async function guardarEditNota() {
+  if (!_editNotaNombre) return;
+  const obs = document.getElementById('en-obs').value.trim();
+  const rec = document.getElementById('en-rec').value;
+  const btn = document.getElementById('btn-guardar-nota');
+  btn.disabled = true; btn.textContent = 'Guardando en Sheets...';
+  toast('Guardando...', 'var(--warn)');
+
+  // Guardar en memoria siempre (respaldo inmediato)
+  setLocalNote(_editNotaNombre, obs, rec);
+
+  // Intentar persistir en Sheets
+  try {
+    const datos = { observaciones: obs, recordatorio: rec };
+    const res = await api({
+      accion: 'updateCliente',
+      nombre: encodeURIComponent(_editNotaNombre),
+      datos:  encodeURIComponent(JSON.stringify(datos))
+    });
+    if (res.ok) {
+      CACHE.clientes = null; // forzar recarga desde Sheets
+      toast('✓ Guardado en Sheets', 'var(--green)');
+    } else {
+      toast('⚠️ Guardado local (Sheets: ' + (res.error || 'sin soporte aún') + ')', 'var(--warn)');
+    }
+  } catch(err) {
+    toast('⚠️ Guardado local · sin conexión a Sheets', 'var(--warn)');
+  }
+
+  btn.disabled = false; btn.textContent = 'Guardar';
+  closeModal('m-editnota');
+  updateBadge();
+  renderClientes();
+}
+
+// ★ Editar nota y recordatorio desde el modal de detalle
+function editarNotaCliente(nombre) {
+  const c = (window._cliList||[]).find(x => getNombre(x) === nombre) || {};
+  const obs = getObsEfectiva(c);
+  const rec = getRecEfectivo(c);
+
+  const body = document.getElementById('m-detail-body');
+  // Quitar form previo si existe
+  const prev = document.getElementById('nota-edit-form');
+  if (prev) prev.remove();
+
+  const div = document.createElement('div');
+  div.id = 'nota-edit-form';
+  div.className = 'nota-edit-box';
+  div.innerHTML = `
+    <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--accent)">✏️ Nota para ${nombre}</div>
+    <div class="form-group">
+      <label class="lbl">Observaciones</label>
+      <textarea class="inp" id="edit-obs" rows="4" style="resize:vertical">${obs}</textarea>
+    </div>
+    <div class="form-group">
+      <label class="lbl">Recordatorio de llamada</label>
+      <input class="inp" id="edit-rec" type="date" value="${rec}">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-p" style="flex:1" onclick="guardarNotaCliente('${nombre.replace(/'/g,"\\'")}')">Guardar</button>
+      <button class="btn-sm" onclick="document.getElementById('nota-edit-form').remove()">Cancelar</button>
+    </div>`;
+
+  // Insertar antes de la sección de botones (al final del modal antes del cierre)
+  const notaSection = document.getElementById('nota-section');
+  if (notaSection) body.insertBefore(div, notaSection);
+  else body.insertBefore(div, body.lastChild);
+  div.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function guardarNotaCliente(nombre) {
+  const obs = document.getElementById('edit-obs').value.trim();
+  const rec = document.getElementById('edit-rec').value;
+  toast('Guardando...', 'var(--warn)');
+
+  // Guardar en memoria siempre (respaldo inmediato)
+  setLocalNote(nombre, obs, rec);
+
+  // Intentar persistir en Sheets
+  try {
+    const datos = { observaciones: obs, recordatorio: rec };
+    const res = await api({
+      accion: 'updateCliente',
+      nombre: encodeURIComponent(nombre),
+      datos:  encodeURIComponent(JSON.stringify(datos))
+    });
+    if (res.ok) {
+      CACHE.clientes = null;
+      toast('✓ Guardado en Sheets', 'var(--green)');
+    } else {
+      toast('⚠️ Guardado local (Sheets: ' + (res.error || 'sin soporte aún') + ')', 'var(--warn)');
+    }
+  } catch(err) {
+    toast('⚠️ Guardado local · sin conexión a Sheets', 'var(--warn)');
+  }
+
+  updateBadge();
+  closeModal('m-detail');
+  const idx = (window._cliList||[]).findIndex(c => getNombre(c) === nombre);
+  if (idx >= 0) setTimeout(() => openDetalle(idx), 200);
 }
 
 async function marcarContactado(nombre) {
@@ -684,21 +963,26 @@ async function guardarCliente() {
   btn.disabled = true; btn.textContent = 'Guardando en Sheets...';
   try {
     const datos = {
-      nombre, whatsapp: document.getElementById('nc-wa').value.trim(),
-      direccion: document.getElementById('nc-dir').value.trim(),
-      comuna: document.getElementById('nc-comuna').value,
-      canal: document.getElementById('nc-canal').value,
-      producto: document.getElementById('nc-prod').value,
+      nombre,
+      whatsapp:      document.getElementById('nc-wa').value.trim(),
+      direccion:     document.getElementById('nc-dir').value.trim(),
+      comuna:        document.getElementById('nc-comuna').value,
+      canal:         document.getElementById('nc-canal').value,
+      producto:      document.getElementById('nc-prod').value,
       ultima_compra: document.getElementById('nc-fecha').value || '',
-      frecuencia: parseInt(document.getElementById('nc-frec').value) || 30,
-      precio_unit: parseFloat(document.getElementById('nc-precio').value) || 17500,
-      costo_unit: 11500, cant_sacos: 1
+      frecuencia:    parseInt(document.getElementById('nc-frec').value) || 30,
+      precio_unit:   parseFloat(document.getElementById('nc-precio').value) || 17500,
+      costo_unit:    11500,
+      cant_sacos:    1,
+      // ★ NUEVOS CAMPOS
+      observaciones: document.getElementById('nc-obs').value.trim(),
+      recordatorio:  document.getElementById('nc-rec').value || ''
     };
     const res = await api({ accion: 'addCliente', datos: encodeURIComponent(JSON.stringify(datos)) });
     if (res.ok) {
       CACHE.clientes = null;
       closeModal('m-addcli');
-      ['nc-nombre','nc-wa','nc-dir','nc-fecha'].forEach(id => document.getElementById(id).value = '');
+      ['nc-nombre','nc-wa','nc-dir','nc-fecha','nc-obs','nc-rec'].forEach(id => document.getElementById(id).value = '');
       toast('✓ Cliente guardado en Sheets', 'var(--green)');
       renderClientes(); updateBadge();
     } else { toast('Error: ' + (res.error || 'desconocido'), 'var(--danger)'); }
@@ -713,20 +997,53 @@ async function renderSeguimiento() {
   const el = document.getElementById('seg-list');
   try {
     const clientes = await getClientes();
-    const sorted = clientes.filter(c => getNombre(c) && getNombre(c) !== 'Sin nombre')
+    const sorted = clientes
+      .filter(c => getNombre(c) && getNombre(c) !== 'Sin nombre')
       .sort((a,b) => urgOrder(a) - urgOrder(b));
-    const urgentes = sorted.filter(c => { const a=alerta(diasSin(getUltimaCompra(c)),getFrecuencia(c)); return a==='vencido'||a==='urgente'; });
+
+    const urgentes = sorted.filter(c => {
+      const a = alerta(diasSin(getUltimaCompra(c)), getFrecuencia(c));
+      return a === 'vencido' || a === 'urgente';
+    });
+
+    // ★ Recordatorios pendientes (vencidos o para hoy)
+    const recHoy = sorted.filter(c => tieneRecordatorioPendiente(c));
 
     document.getElementById('seg-alert-bar').innerHTML = urgentes.length ?
       `<div style="background:var(--danger-dim);border:1px solid var(--danger);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px">
         <i class="ph-bold ph-warning" style="color:var(--danger);font-size:22px;flex-shrink:0"></i>
-        <div><div style="font-weight:700;color:var(--danger)">${urgentes.length} cliente${urgentes.length>1?'s':''} requieren contacto hoy</div>
+        <div><div style="font-weight:700;color:var(--danger)">${urgentes.length} cliente${urgentes.length>1?'s':''} requieren contacto urgente</div>
         <div style="font-size:12px;color:var(--muted)">Datos en tiempo real desde Google Sheets</div></div>
       </div>` :
       `<div style="background:var(--green-dim);border:1px solid var(--green);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px">
         <i class="ph-bold ph-check-circle" style="color:var(--green);font-size:22px"></i>
         <div style="font-weight:600;color:var(--green)">Todo al día · Sin urgencias hoy ✓</div>
       </div>`;
+
+    // ★ BANNER RECORDATORIOS
+    document.getElementById('seg-rec-bar').innerHTML = recHoy.length ?
+      `<div style="background:rgba(129,140,248,.15);border:1px solid #818CF8;border-radius:12px;padding:12px 14px;margin-top:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:18px">🔔</span>
+          <span style="font-weight:700;color:#818CF8">${recHoy.length} recordatorio${recHoy.length>1?'s':''} de llamada pendiente${recHoy.length>1?'s':''}</span>
+        </div>
+        ${recHoy.map(c => {
+          const nombre = getNombre(c);
+          const rec = getRecEfectivo(c);
+          const obs = getObsEfectiva(c);
+          const wa = getWA(c);
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid rgba(129,140,248,.2)">
+            <div>
+              <div style="font-weight:600;font-size:14px">${nombre}</div>
+              ${obs ? `<div style="font-size:12px;color:var(--muted);margin-top:2px">${obs.slice(0,60)}${obs.length>60?'…':''}</div>` : ''}
+              <div style="font-size:11px;color:#818CF8;margin-top:2px">Recordatorio: ${formatDate(rec)}</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              ${wa && wa.length>5 ? `<a href="${waLink(wa)}" target="_blank"><button class="btn-wa" style="font-size:11px;padding:6px 10px"><i class="ph-bold ph-whatsapp-logo"></i></button></a>` : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>` : '';
 
     const accionMap = {
       vencido: '🔴 RECUPERAR · Recompra esperada ya pasó. Llamar hoy.',
@@ -739,15 +1056,18 @@ async function renderSeguimiento() {
 
     el.innerHTML = sorted.map((c,i) => {
       const ds = diasSin(getUltimaCompra(c));
-      const a = alerta(ds, getFrecuencia(c));
+      const a  = alerta(ds, getFrecuencia(c));
       const nombre = getNombre(c);
       const wa = getWA(c);
       const diasAlProx = getFrecuencia(c) - ds;
+      const rec = getRecEfectivo(c);
+      const recTag = rec && rec <= today() ? `<span class="rec-chip rec-hoy" style="margin-top:6px;display:inline-flex">🔔 Recordatorio HOY</span>` : '';
       return `<div class="${cls[a]||'seg-o'} seg-card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
           <div>
             <div style="font-weight:700;font-size:15px">${nombre}</div>
             <div style="font-size:12px;color:var(--muted)">${getProducto(c)} · ${getComuna(c)}</div>
+            ${recTag}
           </div>
           <span class="badge b-${a}">${{vencido:'Vencido',urgente:'Urgente',pronto:'Pronto',ok:'OK',sindatos:'—'}[a]}</span>
         </div>
@@ -767,66 +1087,147 @@ async function renderSeguimiento() {
 }
 
 // ═══════════════════════════════════════════════
-// VENTAS
+// VENTAS — AUTOCOMPLETE CLIENTE
 // ═══════════════════════════════════════════════
-function toggleClienteNuevo() {
-  const sel = document.getElementById('v-cliente');
-  const campo = document.getElementById('campo-cliente-nuevo');
-  if (sel.value === '__nuevo__') {
-    campo.style.display = 'block';
-    document.getElementById('v-cliente-nuevo').focus();
+let _ventaCliList = [];
+
+function filterVentaClientes() {
+  const q   = (document.getElementById('v-cli-search').value || '').toLowerCase().trim();
+  const dd  = document.getElementById('v-cli-dropdown');
+  const src = q.length > 0
+    ? _ventaCliList.filter(c => getNombre(c).toLowerCase().includes(q))
+    : _ventaCliList.slice(0, 12);
+
+  if (!src.length && q.length > 0) {
+    dd.innerHTML = `<div class="ac-item" style="color:var(--muted)">Sin resultados · <span style="color:var(--accent);cursor:pointer;font-weight:700" onclick="newVentaCliente()">+ Nuevo cliente</span></div>`;
   } else {
-    campo.style.display = 'none';
+    dd.innerHTML = src.slice(0, 10).map(c => {
+      const nombre  = getNombre(c).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      const comuna  = getComuna(c).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      const prod    = getProducto(c).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      return `<div class="ac-item" onclick="selectVentaCliente('${nombre}','${comuna}','${prod}')">
+        <div>${getNombre(c)}</div>
+        <div class="ac-sub">${getProducto(c)} · ${getComuna(c)}</div>
+      </div>`;
+    }).join('') + `<div class="ac-item" style="color:var(--accent);font-weight:700;font-size:13px" onclick="newVentaCliente()">➕ Nuevo cliente...</div>`;
   }
+  dd.classList.add('open');
+}
+
+function selectVentaCliente(nombre, comuna, producto) {
+  document.getElementById('v-cliente').value = nombre;
+  document.getElementById('v-cli-search').value = '';
+  document.getElementById('v-cli-dropdown').classList.remove('open');
+  document.getElementById('v-cli-sel-name').textContent = nombre;
+  document.getElementById('v-cli-selected').style.display = 'block';
+  document.getElementById('v-cli-wrap').style.display = 'none';
+  document.getElementById('campo-cliente-nuevo').style.display = 'none';
+  // Auto-rellenar comuna → tramo
+  if (comuna) {
+    const sel = document.getElementById('v-comuna');
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === comuna) { sel.selectedIndex = i; break; }
+    }
+    autoSetTramo();
+  }
+  calcVenta();
+}
+
+function clearVentaCliente() {
+  document.getElementById('v-cliente').value = '';
+  document.getElementById('v-cli-search').value = '';
+  document.getElementById('v-cli-selected').style.display = 'none';
+  document.getElementById('v-cli-wrap').style.display = 'block';
+  document.getElementById('campo-cliente-nuevo').style.display = 'none';
+  document.getElementById('v-cli-dropdown').classList.remove('open');
+  setTimeout(() => document.getElementById('v-cli-search').focus(), 100);
+}
+
+function newVentaCliente() {
+  document.getElementById('v-cli-dropdown').classList.remove('open');
+  document.getElementById('v-cliente').value = '__nuevo__';
+  document.getElementById('v-cli-selected').style.display = 'none';
+  document.getElementById('v-cli-wrap').style.display = 'none';
+  document.getElementById('campo-cliente-nuevo').style.display = 'block';
+  document.getElementById('v-cliente-nuevo').focus();
+}
+
+// ═══════════════════════════════════════════════
+// VENTAS — TRAMO EDITABLE
+// ═══════════════════════════════════════════════
+function autoSetTramo() {
+  const comuna = document.getElementById('v-comuna').value;
+  const t = tramoFn(comuna);
+  const sel = document.getElementById('pv-tramo');
+  if (sel) { sel.value = t; onTramoChange(); }
+}
+
+// Gestiona visibilidad del input manual al cambiar el select de tramo
+function onTramoChange() {
+  const t = document.getElementById('pv-tramo').value;
+  const manualWrap = document.getElementById('pv-flete-manual-wrap');
+  if (t === 'Manual') {
+    manualWrap.style.display = 'block';
+    document.getElementById('pv-flete-manual').focus();
+  } else {
+    manualWrap.style.display = 'none';
+  }
+  calcVenta();
 }
 
 function calcVenta() {
-  const cant = parseFloat(document.getElementById('v-cant').value) || 0;
+  const cant   = parseFloat(document.getElementById('v-cant').value) || 0;
   const precio = parseFloat(document.getElementById('v-precio').value) || 0;
-  const costo = parseFloat(document.getElementById('v-costo').value) || 0;
-  const comuna = document.getElementById('v-comuna').value;
-  const total = cant * precio;
-  const ft = fleteFn(comuna, total);
-  const t = tramoFn(comuna);
+  const costo  = parseFloat(document.getElementById('v-costo').value) || 0;
+  const total  = cant * precio;
+  const t      = document.getElementById('pv-tramo').value || 'Local';
+
+  let ft;
+  if (t === 'Manual') {
+    ft = parseFloat(document.getElementById('pv-flete-manual').value) || 0;
+  } else {
+    ft = fleteFn(t, total);
+  }
+
   const gan = total - (cant * costo) - ft;
-  document.getElementById('pv-tramo').textContent = t;
   document.getElementById('pv-flete').textContent = ft === 0 ? 'Gratis 🎉' : clp(ft);
   document.getElementById('pv-total').textContent = clp(total);
   document.getElementById('pv-gan').textContent = clp(gan) + (gan > 0 ? ' ✓' : ' ⚠️');
 }
 
+// ═══════════════════════════════════════════════
+// VENTAS — RENDER Y GUARDAR
+// ═══════════════════════════════════════════════
 async function renderVentas() {
   document.getElementById('v-fecha').value = today();
+  autoSetTramo();
   calcVenta();
   try {
     const clientes = await getClientes();
-    const sel = document.getElementById('v-cliente');
-    const prev = sel.value;
-    sel.innerHTML = '<option value="">— Seleccionar cliente —</option>' +
-      clientes.map(c => `<option value="${getNombre(c)}">${getNombre(c)}</option>`).join('') +
-      '<option value="__nuevo__" style="color:var(--accent);font-weight:700">➕ Nuevo cliente...</option>';
-    if (prev) sel.value = prev;
+    _ventaCliList = clientes; // ★ Cargar lista para autocomplete
 
     const ventas = await getVentas();
     const total = ventas.reduce((s,v) => s + parseFloat(v['MONTO ($)'] || 0), 0);
-    const gan = ventas.reduce((s,v) => s + parseFloat(v['GANANCIA ($)'] || 0), 0);
+    const gan   = ventas.reduce((s,v) => s + parseFloat(v['GANANCIA ($)'] || 0), 0);
     document.getElementById('ven-sub').textContent =
       `${ventas.length} transacciones · ${clp(total)} total · ${clp(gan)} ganancia`;
 
     document.getElementById('ven-list').innerHTML = ventas.length ?
-      ventas.slice().reverse().slice(0,20).map(v => `
-        <div class="card-sm" style="display:flex;justify-content:space-between;align-items:center">
+      ventas.slice().reverse().slice(0,20).map(v => {
+        const tramo = tramoFn(v['COMUNA'] || '');
+        return `<div class="card-sm" style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <div style="font-size:14px;font-weight:600">${v['CLIENTE'] || '—'}</div>
-            <div style="font-size:12px;color:var(--muted)">${v['PRODUCTO'] || ''} · ${v['CANT. SACOS'] || v['CANT.\nSACOS'] || ''} sacos · ${v['COMUNA'] || ''}</div>
+            <div style="font-size:14px;font-weight:600">${v['CLIENTE']||'—'}</div>
+            <div style="font-size:12px;color:var(--muted)">${v['PRODUCTO']||''} · ${v['CANT. SACOS']||v['CANT.\nSACOS']||''} sacos · ${v['COMUNA']||''}</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">${formatDate(v['FECHA'])}</div>
           </div>
           <div style="text-align:right">
             <div style="font-size:15px;font-weight:700;color:var(--accent)">${clp(v['MONTO ($)'])}</div>
             <div style="font-size:12px;color:var(--green)">+${clp(v['GANANCIA ($)'])}</div>
-            <span class="badge b-${(tramoFn(v['COMUNA']||'')).toLowerCase()}" style="font-size:9px;margin-top:3px;display:inline-block">${tramoFn(v['COMUNA']||'')}</span>
+            <span class="badge b-${tramo.toLowerCase()}" style="font-size:9px;margin-top:3px;display:inline-block">${tramo}</span>
           </div>
-        </div>`).join('') :
+        </div>`;
+      }).join('') :
       `<div class="empty"><i class="ph-bold ph-receipt"></i>Sin ventas registradas</div>`;
   } catch(err) {
     document.getElementById('ven-list').innerHTML = `<div class="empty"><i class="ph-bold ph-wifi-slash"></i>Error: ${err.message}</div>`;
@@ -839,17 +1240,20 @@ async function guardarVenta() {
     cliente = document.getElementById('v-cliente-nuevo').value.trim();
     if (!cliente) { toast('Escribe el nombre del cliente nuevo', 'var(--danger)'); return; }
   }
-  const cant = parseFloat(document.getElementById('v-cant').value) || 0;
-  const precio = parseFloat(document.getElementById('v-precio').value) || 0;
-  const costo = parseFloat(document.getElementById('v-costo').value) || 0;
-  const comuna = document.getElementById('v-comuna').value;
   if (!cliente) { toast('Selecciona un cliente', 'var(--danger)'); return; }
+
+  const cant  = parseFloat(document.getElementById('v-cant').value) || 0;
+  const precio= parseFloat(document.getElementById('v-precio').value) || 0;
+  const costo = parseFloat(document.getElementById('v-costo').value) || 0;
+  const t     = document.getElementById('pv-tramo').value || 'Local';
+  const comuna= document.getElementById('v-comuna').value;
   if (!cant || !precio) { toast('Ingresa cantidad y precio', 'var(--danger)'); return; }
 
-  const total = cant * precio;
-  const ft = fleteFn(comuna, total);
-  const gan = total - (cant * costo) - ft;
-  const t = tramoFn(comuna);
+  const total  = cant * precio;
+  const ft     = t === 'Manual'
+    ? (parseFloat(document.getElementById('pv-flete-manual').value) || 0)
+    : fleteFn(t, total);
+  const gan    = total - (cant * costo) - ft;
   const margen = precio > 0 ? ((precio - costo) / precio * 100).toFixed(1) + '%' : '';
 
   const btn = document.getElementById('btn-guardar-venta');
@@ -857,16 +1261,25 @@ async function guardarVenta() {
   toast('Registrando venta...', 'var(--warn)');
   try {
     const datos = {
-      fecha: document.getElementById('v-fecha').value || today(),
-      cliente, producto: document.getElementById('v-producto').value,
-      cantidad: cant, monto: total, costo_unit: costo,
-      costo_total: cant * costo, ganancia: gan, margen,
-      comuna, tramo: t, flete: ft, cobro_despacho: ft
+      fecha:      document.getElementById('v-fecha').value || today(),
+      cliente,
+      producto:   document.getElementById('v-producto').value,
+      cantidad:   cant,
+      monto:      total,
+      costo_unit: costo,
+      costo_total:cant * costo,
+      ganancia:   gan,
+      margen,
+      comuna,
+      tramo:      t,
+      flete:      ft,
+      cobro_despacho: ft
     };
     const res = await api({ accion: 'addVenta', datos: encodeURIComponent(JSON.stringify(datos)) });
     if (res.ok) {
       CACHE.ventas = null; CACHE.clientes = null;
       document.getElementById('v-cant').value = '1';
+      clearVentaCliente();
       calcVenta();
       toast(`✓ Venta registrada en Sheets · ${clp(gan)} ganancia`, 'var(--green)');
       renderVentas(); updateBadge();
@@ -879,10 +1292,10 @@ async function guardarVenta() {
 // PIPELINE
 // ═══════════════════════════════════════════════
 const ETAPAS = [
-  {id:'prospecto',label:'🔍 Prospecto'},
+  {id:'prospecto', label:'🔍 Prospecto'},
   {id:'contactado',label:'📞 Contactado'},
-  {id:'propuesta',label:'🤝 Propuesta'},
-  {id:'cliente',label:'✅ Cliente'}
+  {id:'propuesta', label:'🤝 Propuesta'},
+  {id:'cliente',   label:'✅ Cliente'}
 ];
 
 async function renderPipeline() {
@@ -907,8 +1320,8 @@ async function renderPipeline() {
         ${cards.map(p => {
           const ds = p['ULTIMO_CONTACTO'] ? Math.floor((new Date()-new Date(p['ULTIMO_CONTACTO']))/86400000) : 999;
           const alrt = ds>14?'🔴':ds>7?'🟡':'✅';
-          const tel = p['TELEFONO']||'';
-          const id = getId(p);
+          const tel  = p['TELEFONO']||'';
+          const id   = getId(p);
           return `<div class="k-card" onclick="openEditPip(${id})">
             <div style="font-weight:700;font-size:14px;margin-bottom:3px">${p['EMPRESA']||'—'}</div>
             <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${p['CONTACTO']||''}</div>
@@ -954,8 +1367,8 @@ async function actualizarProspecto(id) {
   btn.disabled = true; btn.textContent = 'Guardando...';
   try {
     const datos = {
-      etapa: document.getElementById('ep-etapa').value,
-      sacos: parseInt(document.getElementById('ep-sacos').value) || 5,
+      etapa:         document.getElementById('ep-etapa').value,
+      sacos:         parseInt(document.getElementById('ep-sacos').value) || 5,
       ultimo_contacto: document.getElementById('ep-uc').value || today()
     };
     const res = await api({ accion: 'updatePipeline', id, datos: encodeURIComponent(JSON.stringify(datos)) });
@@ -985,11 +1398,12 @@ async function guardarProspecto() {
   btn.disabled = true; btn.textContent = 'Guardando...';
   try {
     const datos = {
-      empresa, contacto: document.getElementById('np-contacto').value.trim(),
-      telefono: document.getElementById('np-tel').value.trim(),
-      etapa: document.getElementById('np-etapa').value,
-      sacos: parseInt(document.getElementById('np-sacos').value) || 5,
-      precio_unit: parseFloat(document.getElementById('np-precio').value) || 16000,
+      empresa,
+      contacto:       document.getElementById('np-contacto').value.trim(),
+      telefono:       document.getElementById('np-tel').value.trim(),
+      etapa:          document.getElementById('np-etapa').value,
+      sacos:          parseInt(document.getElementById('np-sacos').value) || 5,
+      precio_unit:    parseFloat(document.getElementById('np-precio').value) || 16000,
       ultimo_contacto: today()
     };
     const res = await api({ accion: 'addPipeline', datos: encodeURIComponent(JSON.stringify(datos)) });
@@ -1009,6 +1423,8 @@ async function guardarProspecto() {
 // ═══════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   renderDash();
+  // Precargar clientes para autocomplete de ventas
+  getClientes().then(list => { _ventaCliList = list; }).catch(()=>{});
 });
 </script>
 </body>
