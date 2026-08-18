@@ -410,10 +410,24 @@ window._localNotes = {};
 function getLocalNote(nombre) { return window._localNotes[nombre] || {}; }
 function setLocalNote(nombre, obs, rec) { window._localNotes[nombre] = { obs, rec }; }
 
+const ESCRITURAS = ['addVenta', 'addCliente', 'updateContacto', 'updateCliente'];
+
 async function api(params) {
+  const esEscritura = ESCRITURAS.includes(params.accion);
+  const proxyUrl = '/api/proxy?' + new URLSearchParams(params).toString();
+
+  // Las escrituras SOLO van por el proxy → GAS_UPDATE. Sin fallbacks de terceros.
+  if (esEscritura) {
+    const res = await fetch(proxyUrl, { redirect: 'follow' });
+    const text = await res.text();
+    if (text && (text.trim()[0] === '{' || text.trim()[0] === '[')) return JSON.parse(text);
+    throw new Error('Respuesta inválida del proxy: ' + text.substring(0, 100));
+  }
+
+  // Lecturas: proxy primero, luego fallbacks (todos apuntan a GAS_MAIN, correcto)
   const target = API + '?' + new URLSearchParams(params).toString();
   const urls = [
-    '/api/proxy?' + new URLSearchParams(params).toString(),
+    proxyUrl,
     'https://api.allorigins.win/raw?url=' + encodeURIComponent(target),
     'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(target)
   ];
