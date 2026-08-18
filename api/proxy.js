@@ -7,7 +7,7 @@ module.exports = async function handler(req, res) {
   const GAS_MAIN = 'https://script.google.com/macros/s/AKfycbwg15wVGvEp98Aq1S0OnafmISuSz_fqpXDmq9q8gTcIJyL-tUafIHof99ZntkLhYVGBTg/exec';
 
   // URL secundaria solo para updateCliente (observaciones y recordatorio)
-      const GAS_UPDATE = 'https://script.google.com/macros/s/AKfycbx1sHRzd4bXrV8OHGwy1cox1Q_KG2ljyJxok4k6zmDtpMyOeFDltSugbKEOiqf-xQhX/exec';c';
+      const GAS_UPDATE = 'https://script.google.com/macros/s/AKfycbx1sHRzd4bXrV8OHGwy1cox1Q_KG2ljyJxok4k6zmDtpMyOeFDltSugbKEOiqf-xQhX/exec';
   const accion = (req.query.accion || '').toString();
   const GAS = accion === 'updateCliente' ? GAS_UPDATE : GAS_MAIN;
   const params = new URLSearchParams(req.query).toString();
