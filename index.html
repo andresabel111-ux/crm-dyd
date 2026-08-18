@@ -1236,9 +1236,11 @@ async function renderVentas() {
 
 async function guardarVenta() {
   let cliente = document.getElementById('v-cliente').value;
+  let esClienteNuevo = false;
   if (cliente === '__nuevo__') {
     cliente = document.getElementById('v-cliente-nuevo').value.trim();
     if (!cliente) { toast('Escribe el nombre del cliente nuevo', 'var(--danger)'); return; }
+    esClienteNuevo = true;
   }
   if (!cliente) { toast('Selecciona un cliente', 'var(--danger)'); return; }
 
@@ -1260,6 +1262,32 @@ async function guardarVenta() {
   btn.disabled = true; btn.textContent = 'Guardando en Sheets...';
   toast('Registrando venta...', 'var(--warn)');
   try {
+    // ★ Si es cliente nuevo, crearlo en CLIENTES antes de registrar la venta
+    if (esClienteNuevo) {
+      toast('Creando cliente nuevo en Sheets...', 'var(--warn)');
+      const datosCliente = {
+        nombre:       cliente,
+        whatsapp:     '',
+        direccion:    '',
+        comuna:       comuna,
+        canal:        'Directo',
+        producto:     document.getElementById('v-producto').value,
+        ultima_compra: document.getElementById('v-fecha').value || today(),
+        frecuencia:   30,
+        precio_unit:  precio,
+        costo_unit:   costo,
+        cant_sacos:   cant,
+        observaciones: '',
+        recordatorio: ''
+      };
+      const resCliente = await api({ accion: 'addCliente', datos: encodeURIComponent(JSON.stringify(datosCliente)) });
+      if (resCliente.ok) {
+        CACHE.clientes = null;
+      } else {
+        toast('⚠️ Cliente no pudo guardarse en CLIENTES: ' + (resCliente.error || ''), 'var(--warn)');
+      }
+    }
+
     const datos = {
       fecha:      document.getElementById('v-fecha').value || today(),
       cliente,
