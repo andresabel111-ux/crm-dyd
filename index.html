@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CRM DYD · Arena</title>
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
-<style>
+<style>h
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0F1117;--surface:#181B26;--card:#1E2133;--border:#272B3E;
@@ -866,8 +866,8 @@ async function guardarEditNota() {
     const datos = { observaciones: obs, recordatorio: rec };
     const res = await api({
       accion: 'updateCliente',
-      nombre: encodeURIComponent(_editNotaNombre),
-      datos:  encodeURIComponent(JSON.stringify(datos))
+      nombre: _editNotaNombre,
+      datos:  JSON.stringify(datos)
     });
     if (res.ok) {
       CACHE.clientes = null; // forzar recarga desde Sheets
@@ -934,8 +934,8 @@ async function guardarNotaCliente(nombre) {
     const datos = { observaciones: obs, recordatorio: rec };
     const res = await api({
       accion: 'updateCliente',
-      nombre: encodeURIComponent(nombre),
-      datos:  encodeURIComponent(JSON.stringify(datos))
+      nombre: nombre,
+      datos:  JSON.stringify(datos)
     });
     if (res.ok) {
       CACHE.clientes = null;
@@ -956,7 +956,7 @@ async function guardarNotaCliente(nombre) {
 async function marcarContactado(nombre) {
   try {
     toast('Actualizando en Sheets...', 'var(--warn)');
-    const res = await api({ accion: 'updateContacto', nombre: encodeURIComponent(nombre), fecha: today() });
+    const res = await api({ accion: 'updateContacto', nombre: nombre, fecha: today() });
     if (res.ok) {
       CACHE.clientes = null;
       closeModal('m-detail');
@@ -992,7 +992,7 @@ async function guardarCliente() {
       observaciones: document.getElementById('nc-obs').value.trim(),
       recordatorio:  document.getElementById('nc-rec').value || ''
     };
-    const res = await api({ accion: 'addCliente', datos: encodeURIComponent(JSON.stringify(datos)) });
+    const res = await api({ accion: 'addCliente', datos: JSON.stringify(datos) });
     if (res.ok) {
       CACHE.clientes = null;
       closeModal('m-addcli');
@@ -1294,7 +1294,7 @@ async function guardarVenta() {
         observaciones: '',
         recordatorio: ''
       };
-      const resCliente = await api({ accion: 'addCliente', datos: encodeURIComponent(JSON.stringify(datosCliente)) });
+      const resCliente = await api({ accion: 'addCliente', datos: JSON.stringify(datosCliente) });
       if (resCliente.ok) {
         CACHE.clientes = null;
       } else {
@@ -1317,7 +1317,7 @@ async function guardarVenta() {
       flete:      ft,
       cobro_despacho: ft
     };
-    const res = await api({ accion: 'addVenta', datos: encodeURIComponent(JSON.stringify(datos)) });
+    const res = await api({ accion: 'addVenta', datos: JSON.stringify(datos) });
     if (res.ok) {
       CACHE.ventas = null; CACHE.clientes = null;
       document.getElementById('v-cant').value = '1';
@@ -1413,7 +1413,7 @@ async function actualizarProspecto(id) {
       sacos:         parseInt(document.getElementById('ep-sacos').value) || 5,
       ultimo_contacto: document.getElementById('ep-uc').value || today()
     };
-    const res = await api({ accion: 'updatePipeline', id, datos: encodeURIComponent(JSON.stringify(datos)) });
+    const res = await api({ accion: 'updatePipeline', id, datos: JSON.stringify(datos) });
     if (res.ok) {
       CACHE.pipeline = null;
       closeModal('m-editpip');
@@ -1448,7 +1448,7 @@ async function guardarProspecto() {
       precio_unit:    parseFloat(document.getElementById('np-precio').value) || 16000,
       ultimo_contacto: today()
     };
-    const res = await api({ accion: 'addPipeline', datos: encodeURIComponent(JSON.stringify(datos)) });
+    const res = await api({ accion: 'addPipeline', datos: JSON.stringify(datos) });
     if (res.ok) {
       CACHE.pipeline = null;
       closeModal('m-addpip');
