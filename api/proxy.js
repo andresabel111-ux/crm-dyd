@@ -1,23 +1,19 @@
+// proxy.js v2 — CRM DYD Arena
+// Una sola URL GAS para lecturas y escrituras
 module.exports = async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    if (req.method === 'OPTIONS') return res.status(200).end();
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
-    const GAS_MAIN = 'https://script.google.com/macros/s/AKfycbwg15wVGvEp98Aq1S0OnafmISuSz_fqpXDmq9q8gTcIJyL-tUafIHof99ZntkLhYVGBTg/exec';
-    const GAS_UPDATE = 'https://script.google.com/macros/s/AKfycbzLiT3KhhNTeLVztUuL_vIW__YMMa4y3y0a0WdJyauZENbU-XtTHthG_ILw-OOUAEQfew/exec';
+  const GAS = 'https://script.google.com/macros/s/AKfycbyktSeakiP4QiNaYW9g3vnZxAE38WH2KnlkKVoJlkaUht9RJydfF8um5t6G10tiqXhHpw/exec';
 
-    const accion = (req.query.accion || '').toString();
-    const ESCRITURAS = ['addVenta', 'addCliente', 'updateContacto', 'updateCliente', 'addPipeline', 'deletePipeline', 'updatePipeline'];
-    const GAS = ESCRITURAS.includes(accion) ? GAS_UPDATE : GAS_MAIN;
-
-    const params = new URLSearchParams(req.query).toString();
-
-    try {
-          const r = await fetch(`${GAS}?${params}`, { redirect: 'follow' });
-          const texto = await r.text();
-          res.setHeader('Content-Type', 'application/json');
-          return res.status(200).send(texto);
-    } catch (mi) {
-          return res.status(500).json({ error: mi.message });
-    }
+  const params = new URLSearchParams(req.query).toString();
+  try {
+    const r = await fetch(`${GAS}?${params}`, { redirect: 'follow' });
+    const texto = await r.text();
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(200).send(texto);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 };
