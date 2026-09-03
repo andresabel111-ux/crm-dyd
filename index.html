@@ -545,7 +545,10 @@ function avatarColor(n) {
 function waLink(wa) { return 'https://wa.me/'+String(wa).replace(/[^0-9]/g,''); }
 function formatDate(d) {
   if (!d) return '—';
-  return new Date(d+'T12:00:00').toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'});
+  const _s = String(d).trim();
+  const _dt = /^\d{4}-\d{2}-\d{2}$/.test(_s) ? new Date(_s + 'T12:00:00') : new Date(_s);
+  if (isNaN(_dt.getTime())) return '—';
+  return _dt.toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'});
 }
 function today() { return new Date().toISOString().split('T')[0]; }
 function urgOrder(c) {
@@ -1007,7 +1010,10 @@ async function guardarVenta() {
   let nombreCliente = clienteHidden==='__nuevo__'
     ? document.getElementById('v-cliente-nuevo').value.trim()
     : clienteHidden;
-  if (!nombreCliente) { toast('⚠️ Selecciona o escribe un cliente','var(--danger)'); return; }
+  if (!nombreCliente) {
+          try { nombreCliente = (document.getElementById('v-cli-search').value || '').trim(); } catch(_e) {}
+        }
+        if (!nombreCliente) { toast('⚠️ Selecciona o escribe un cliente','var(--danger)'); return; }
 
   const cant   = parseInt(document.getElementById('v-cant').value)||1;
   const precio = parseFloat(document.getElementById('v-precio').value)||0;
@@ -1269,6 +1275,34 @@ window.addEventListener('DOMContentLoaded', ()=>{
   renderDash();
   updateBadge();
 });
+
+/* Aviso de cliente en Nueva Venta: evita el boton que 'no hace nada'. Defensivo: si algo falla, no afecta la app. */
+(function(){
+  function initHintCliente(){
+    try {
+      var inp = document.getElementById('v-cli-search');
+      if (!inp || document.getElementById('v-cli-hint')) return;
+      var tag = document.createElement('div');
+      tag.id = 'v-cli-hint';
+      tag.style.cssText = 'font-size:12px;margin-top:6px;font-weight:600;min-height:16px';
+      inp.insertAdjacentElement('afterend', tag);
+      inp.addEventListener('input', function(){
+        try {
+          var q = (inp.value || '').trim();
+          if (!q) { tag.textContent = ''; return; }
+          var lista = (window.CACHE && window.CACHE.clientes) || [];
+          var hit = lista.some(function(c){
+            return String(c.CLIENTE || '').trim().toLowerCase() === q.toLowerCase();
+          });
+          if (hit) { tag.textContent = '\u2713 cliente existente'; tag.style.color = 'var(--accent)'; }
+          else { tag.textContent = 'Se registrara como: ' + q; tag.style.color = 'var(--warn)'; }
+        } catch(_e) {}
+      });
+    } catch(_e) {}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initHintCliente);
+  else initHintCliente();
+})();
 </script>
 </body>
 </html>
