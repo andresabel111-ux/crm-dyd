@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fuerza Fit · Tienda Deportiva</title>
+<meta name="description" content="Fuerza Fit — equipamiento, ropa y suplementos deportivos. Rendimiento real para tu entrenamiento.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💪</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        ink: '#0A0A0A',
+        paper: '#FAFAF8',
+        lime: '#CBFF3D',
+      },
+      fontFamily: {
+        display: ['"Bebas Neue"', 'sans-serif'],
+        body: ['Manrope', 'sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  html{scroll-behavior:smooth}
+  body{font-family:'Manrope',sans-serif}
+  .font-display{font-family:'Bebas Neue',sans-serif; letter-spacing:.02em}
+  .marquee-track{display:flex;width:max-content;animation:scroll 22s linear infinite}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:translateY(0)}
+  ::selection{background:#CBFF3D;color:#0A0A0A}
+</style>
+</head>
+<body class="bg-paper text-ink antialiased">
+
+<!-- NAV -->
+<header id="nav" class="fixed top-0 inset-x-0 z-50 transition-colors duration-300 text-paper">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 flex items-center justify-between h-16 md:h-20">
+    <a href="#top" class="font-display text-2xl md:text-3xl tracking-wide">FUERZA<span class="text-lime bg-ink px-1 ml-0.5">FIT</span></a>
+    <nav class="hidden md:flex items-center gap-9 text-sm font-semibold uppercase tracking-wide">
+      <a href="#categorias" class="hover:opacity-60 transition">Categorías</a>
+      <a href="#productos" class="hover:opacity-60 transition">Destacados</a>
+      <a href="#nosotros" class="hover:opacity-60 transition">Nosotros</a>
+      <a href="#contacto" class="hover:opacity-60 transition">Contacto</a>
+    </nav>
+    <a href="#contacto" class="hidden md:inline-flex items-center gap-2 bg-ink text-paper text-sm font-bold uppercase px-5 py-2.5 rounded-full hover:bg-lime hover:text-ink transition-colors">
+      Comprar ahora
+    </a>
+    <button id="menuBtn" class="md:hidden p-2 -mr-2" aria-label="Abrir menú">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+  <!-- Mobile menu -->
+  <div id="mobileMenu" class="hidden md:hidden bg-ink text-paper px-5 pb-6 pt-2">
+    <nav class="flex flex-col gap-1 text-lg font-display tracking-wide">
+      <a href="#categorias" class="py-3 border-b border-white/10">CATEGORÍAS</a>
+      <a href="#productos" class="py-3 border-b border-white/10">DESTACADOS</a>
+      <a href="#nosotros" class="py-3 border-b border-white/10">NOSOTROS</a>
+      <a href="#contacto" class="py-3">CONTACTO</a>
+    </nav>
+    <a href="#contacto" class="mt-4 block text-center bg-lime text-ink font-bold uppercase text-sm px-5 py-3 rounded-full">Comprar ahora</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section id="top" class="relative min-h-[100svh] flex items-end bg-ink text-paper overflow-hidden pt-16 md:pt-20">
+  <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1974&auto=format&fit=crop" alt="Entrenamiento de fuerza" class="absolute inset-0 w-full h-full object-cover opacity-45">
+  <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/20"></div>
+  <div class="relative max-w-7xl mx-auto px-5 md:px-8 pb-16 md:pb-24 w-full">
+    <p class="uppercase text-xs md:text-sm font-bold tracking-[0.3em] text-lime mb-4">Equipamiento · Ropa · Suplementos</p>
+    <h1 class="font-display text-[15vw] leading-[0.85] md:text-[8.5vw] md:leading-[0.82] max-w-4xl">
+      RENDIMIENTO<br>QUE SE NOTA
+    </h1>
+    <p class="mt-6 max-w-md text-base md:text-lg text-paper/75">
+      Todo lo que necesitas para entrenar más fuerte, más lejos y sin excusas. Envíos a todo Chile.
+    </p>
+    <div class="mt-8 flex flex-wrap gap-4">
+      <a href="#productos" class="bg-lime text-ink font-bold uppercase text-sm px-7 py-4 rounded-full hover:scale-105 transition-transform">Ver productos</a>
+      <a href="#categorias" class="border border-paper/40 text-paper font-bold uppercase text-sm px-7 py-4 rounded-full hover:bg-paper hover:text-ink transition-colors">Explorar categorías</a>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="bg-lime text-ink overflow-hidden border-y border-ink/10">
+  <div class="marquee-track py-3">
+    <div class="flex items-center gap-8 pr-8 text-sm font-bold uppercase tracking-wide">
+      <span>Envío en 24-48h</span><span>·</span><span>Pago seguro</span><span>·</span><span>Devolución 15 días</span><span>·</span><span>Asesoría gratuita</span><span>·</span>
+      <span>Envío en 24-48h</span><span>·</span><span>Pago seguro</span><span>·</span><span>Devolución 15 días</span><span>·</span><span>Asesoría gratuita</span><span>·</span>
+    </div>
+    <div class="flex items-center gap-8 pr-8 text-sm font-bold uppercase tracking-wide" aria-hidden="true">
+      <span>Envío en 24-48h</span><span>·</span><span>Pago seguro</span><span>·</span><span>Devolución 15 días</span><span>·</span><span>Asesoría gratuita</span><span>·</span>
+      <span>Envío en 24-48h</span><span>·</span><span>Pago seguro</span><span>·</span><span>Devolución 15 días</span><span>·</span><span>Asesoría gratuita</span><span>·</span>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORIAS -->
+<section id="categorias" class="max-w-7xl mx-auto px-5 md:px-8 py-20 md:py-28">
+  <div class="flex items-end justify-between mb-10 reveal">
+    <h2 class="font-display text-5xl md:text-6xl">CATEGORÍAS</h2>
+    <span class="hidden md:block text-sm font-semibold text-ink/50">01 / Colección</span>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+    <a href="#contacto" class="reveal group relative rounded-2xl overflow-hidden aspect-[3/4]">
+      <img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=1974&auto=format&fit=crop" alt="Ropa deportiva" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+      <div class="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/10 to-transparent"></div>
+      <span class="absolute bottom-4 left-4 text-paper font-display text-2xl md:text-3xl">ROPA</span>
+    </a>
+    <a href="#contacto" class="reveal group relative rounded-2xl overflow-hidden aspect-[3/4]">
+      <img src="https://images.unsplash.com/photo-1517832606299-7ae9b720a186?q=80&w=1974&auto=format&fit=crop" alt="Calzado deportivo" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+      <div class="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/10 to-transparent"></div>
+      <span class="absolute bottom-4 left-4 text-paper font-display text-2xl md:text-3xl">CALZADO</span>
+    </a>
+    <a href="#contacto" class="reveal group relative rounded-2xl overflow-hidden aspect-[3/4]">
+      <img src="https://images.unsplash.com/photo-1517344368193-41552b6ad3f5?q=80&w=1974&auto=format&fit=crop" alt="Accesorios de entrenamiento" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+      <div class="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/10 to-transparent"></div>
+      <span class="absolute bottom-4 left-4 text-paper font-display text-2xl md:text-3xl">ACCESORIOS</span>
+    </a>
+    <a href="#contacto" class="reveal group relative rounded-2xl overflow-hidden aspect-[3/4]">
+      <img src="https://images.unsplash.com/photo-1594381898411-846e7d193883?q=80&w=1974&auto=format&fit=crop" alt="Suplementos deportivos" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+      <div class="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/10 to-transparent"></div>
+      <span class="absolute bottom-4 left-4 text-paper font-display text-2xl md:text-3xl">SUPLEMENTOS</span>
+    </a>
+  </div>
+</section>
+
+<!-- PRODUCTOS DESTACADOS -->
+<section id="productos" class="bg-ink text-paper py-20 md:py-28">
+  <div class="max-w-7xl mx-auto px-5 md:px-8">
+    <div class="flex items-end justify-between mb-10 reveal">
+      <h2 class="font-display text-5xl md:text-6xl">DESTACADOS</h2>
+      <span class="hidden md:block text-sm font-semibold text-paper/50">02 / Selección</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <article class="reveal bg-paper text-ink rounded-2xl overflow-hidden flex flex-col">
+        <div class="aspect-square overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1974&auto=format&fit=crop" alt="Zapatillas running" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+        </div>
+        <div class="p-5 flex flex-col gap-1 flex-1">
+          <span class="text-xs font-bold uppercase tracking-widest text-ink/50">Calzado</span>
+          <h3 class="font-display text-2xl leading-tight">Zapatillas Running Pro</h3>
+          <div class="mt-auto pt-3 flex items-center justify-between">
+            <span class="font-bold text-lg">$54.990</span>
+            <button class="bg-ink text-paper text-xs font-bold uppercase px-4 py-2 rounded-full hover:bg-lime hover:text-ink transition-colors">Añadir</button>
+          </div>
+        </div>
+      </article>
+      <article class="reveal bg-paper text-ink rounded-2xl overflow-hidden flex flex-col">
+        <div class="aspect-square overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1571008887538-b36bb32f4571?q=80&w=1976&auto=format&fit=crop" alt="Set de mancuernas" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+        </div>
+        <div class="p-5 flex flex-col gap-1 flex-1">
+          <span class="text-xs font-bold uppercase tracking-widest text-ink/50">Accesorios</span>
+          <h3 class="font-display text-2xl leading-tight">Set Mancuernas Ajustables</h3>
+          <div class="mt-auto pt-3 flex items-center justify-between">
+            <span class="font-bold text-lg">$89.990</span>
+            <button class="bg-ink text-paper text-xs font-bold uppercase px-4 py-2 rounded-full hover:bg-lime hover:text-ink transition-colors">Añadir</button>
+          </div>
+        </div>
+      </article>
+      <article class="reveal bg-paper text-ink rounded-2xl overflow-hidden flex flex-col">
+        <div class="aspect-square overflow-hidden">
+          <img src="https://images.unsplash.com/photo-1517343985841-f8b2d66e010f?q=80&w=2072&auto=format&fit=crop" alt="Polera deportiva" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+        </div>
+        <div class="p-5 flex flex-col gap-1 flex-1">
+          <span class="text-xs font-bold uppercase tracking-widest text-ink/50">Ropa</span>
+          <h3 class="font-display text-2xl leading-tight">Polera Dry-Fit Training</h3>
+          <div class="mt-auto pt-3 flex items-center justify-between">
+            <span class="font-bold text-lg">$19.990</span>
+            <button class="bg-ink text-paper text-xs font-bold uppercase px-4 py-2 rounded-full hover:bg-lime hover:text-ink transition-colors">Añadir</button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- NOSOTROS / VALUE PROPS -->
+<section id="nosotros" class="max-w-7xl mx-auto px-5 md:px-8 py-20 md:py-28">
+  <div class="grid md:grid-cols-2 gap-12 items-center">
+    <div class="reveal">
+      <p class="uppercase text-xs font-bold tracking-[0.3em] text-ink/50 mb-4">Nuestro compromiso</p>
+      <h2 class="font-display text-5xl md:text-6xl leading-[0.9] mb-6">HECHO PARA<br>QUIENES NO<br>SE DETIENEN</h2>
+      <p class="text-ink/70 max-w-md">
+        En Fuerza Fit seleccionamos cada producto pensando en resultados reales: materiales que aguantan la exigencia y precios que tienen sentido.
+      </p>
+    </div>
+    <div class="reveal grid grid-cols-2 gap-4">
+      <div class="bg-ink text-paper rounded-2xl p-6 flex flex-col gap-2">
+        <span class="font-display text-4xl text-lime">24-48h</span>
+        <span class="text-sm font-semibold text-paper/70">Envío express a todo Chile</span>
+      </div>
+      <div class="bg-lime text-ink rounded-2xl p-6 flex flex-col gap-2">
+        <span class="font-display text-4xl">15 días</span>
+        <span class="text-sm font-semibold text-ink/70">Devolución sin preguntas</span>
+      </div>
+      <div class="bg-ink text-paper rounded-2xl p-6 flex flex-col gap-2">
+        <span class="font-display text-4xl">100%</span>
+        <span class="text-sm font-semibold text-paper/70">Pago seguro y verificado</span>
+      </div>
+      <div class="bg-ink text-paper rounded-2xl p-6 flex flex-col gap-2">
+        <span class="font-display text-4xl">1:1</span>
+        <span class="text-sm font-semibold text-paper/70">Asesoría personalizada</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section id="contacto" class="bg-lime text-ink py-20 md:py-28">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 text-center">
+    <h2 class="font-display text-[13vw] leading-[0.85] md:text-7xl mb-6">EMPIEZA HOY</h2>
+    <p class="max-w-lg mx-auto mb-8 font-semibold">
+      Escríbenos y arma tu equipamiento con asesoría gratuita, o visita nuestro catálogo completo.
+    </p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="https://wa.me/56900000000" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-ink text-paper font-bold uppercase text-sm px-7 py-4 rounded-full hover:scale-105 transition-transform">
+        Escríbenos por WhatsApp
+      </a>
+      <a href="mailto:contacto@fuerzafit.cl" class="inline-flex items-center gap-2 border-2 border-ink text-ink font-bold uppercase text-sm px-7 py-4 rounded-full hover:bg-ink hover:text-paper transition-colors">
+        Enviar un correo
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-ink text-paper/60 py-12">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+    <a href="#top" class="font-display text-2xl text-paper tracking-wide">FUERZA<span class="text-lime">FIT</span></a>
+    <p class="text-xs md:text-sm text-center">© <span id="year"></span> Fuerza Fit. Todos los derechos reservados.</p>
+    <div class="flex gap-5 text-sm font-semibold">
+      <a href="#" class="hover:text-paper transition-colors">Instagram</a>
+      <a href="#" class="hover:text-paper transition-colors">TikTok</a>
+      <a href="https://wa.me/56900000000" target="_blank" rel="noopener" class="hover:text-paper transition-colors">WhatsApp</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  menuBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.add('hidden')));
+
+  const nav = document.getElementById('nav');
+  const onScroll = () => {
+    const scrolled = window.scrollY > 40;
+    nav.classList.toggle('bg-paper/95', scrolled);
+    nav.classList.toggle('backdrop-blur', scrolled);
+    nav.classList.toggle('shadow-sm', scrolled);
+    nav.classList.toggle('text-ink', scrolled);
+    nav.classList.toggle('text-paper', !scrolled);
+  };
+  document.addEventListener('scroll', onScroll);
+  onScroll();
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
