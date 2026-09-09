@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PRL Minero · Panel de Asesoría</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+:root{
+  --bg:#0F1117;--surface:#181B26;--card:#1E2133;--border:#272B3E;
+  --accent:#F5A623;--accent-dim:rgba(245,166,35,.14);
+  --warn:#FFB547;--warn-dim:rgba(255,181,71,.13);
+  --danger:#FF6B6B;--danger-dim:rgba(255,107,107,.13);
+  --orange:#FF7A3D;--orange-dim:rgba(255,122,61,.13);
+  --text:#EEF2FF;--muted:#6E7494;--subtle:#3A3F58;
+  --green:#4ADE80;--green-dim:rgba(74,222,128,.12);
+  --blue:#60A5FA;--blue-dim:rgba(96,165,250,.12);
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+#app{padding-bottom:76px;min-height:100vh}
+.page{display:none}.page.active{display:block}
+
+#topbar{position:sticky;top:0;z-index:90;background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px}
+#topbar .tb-title{font-size:14px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+#topbar select{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:9px 10px;font-size:13px;font-family:inherit;outline:none}
+
+#nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:100;display:flex;padding-bottom:env(safe-area-inset-bottom,0)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 2px 7px;gap:3px;background:none;border:none;color:var(--muted);cursor:pointer;transition:color .18s;font-family:inherit}
+.nb.active{color:var(--accent)}
+.nb svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nb-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+
+.ph{padding:18px 16px 0;display:flex;align-items:center;justify-content:space-between}
+.pt{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.ps{font-size:13px;color:var(--muted);padding:4px 16px 14px}
+.sl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:14px 16px 8px}
+.px{padding:0 16px}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px}
+.card-sm{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px}
+.empty{text-align:center;padding:36px 20px;color:var(--muted);font-size:13px}
+
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+.kpi-n{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.kpi-l{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.kpi.c-danger .kpi-n{color:var(--danger)}
+.kpi.c-warn .kpi-n{color:var(--warn)}
+.kpi.c-green .kpi-n{color:var(--green)}
+.kpi.c-accent .kpi-n{color:var(--accent)}
+
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.04em;line-height:1.6;white-space:nowrap}
+.b-vencido{background:var(--danger-dim);color:var(--danger)}
+.b-urgente{background:var(--orange-dim);color:var(--orange)}
+.b-pronto{background:var(--warn-dim);color:var(--warn)}
+.b-ok{background:var(--green-dim);color:var(--green)}
+.b-bajo{background:var(--green-dim);color:var(--green)}
+.b-medio{background:var(--warn-dim);color:var(--warn)}
+.b-alto{background:var(--orange-dim);color:var(--orange)}
+.b-critico{background:var(--danger-dim);color:var(--danger)}
+.b-abierto{background:var(--danger-dim);color:var(--danger)}
+.b-proceso{background:var(--warn-dim);color:var(--warn)}
+.b-cerrado{background:var(--green-dim);color:var(--green)}
+
+.inp{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:12px 14px;width:100%;font-size:15px;outline:none;transition:border-color .18s;font-family:inherit}
+.inp:focus{border-color:var(--accent)}
+.inp::placeholder{color:var(--muted)}
+.lbl{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px}
+.fg{margin-bottom:14px}
+select.inp option{background:#1E2133}
+textarea.inp{resize:vertical;min-height:64px;line-height:1.5;font-family:inherit}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.btn-p{background:var(--accent);color:#1a1300;font-weight:700;font-size:15px;border:none;border-radius:12px;padding:14px 24px;width:100%;cursor:pointer;transition:opacity .18s;font-family:inherit}
+.btn-p:active{opacity:.8}
+.btn-s{background:var(--surface);color:var(--text);font-weight:600;font-size:14px;border:1px solid var(--border);border-radius:12px;padding:12px 20px;cursor:pointer;width:100%;text-align:center;font-family:inherit}
+.btn-sm{font-size:12px;font-weight:600;border:1px solid var(--border);border-radius:8px;padding:7px 11px;background:var(--surface);color:var(--text);cursor:pointer;font-family:inherit}
+.btn-sm.danger{color:var(--danger);border-color:rgba(255,107,107,.35)}
+.btn-sm.ok{color:var(--green);border-color:rgba(74,222,128,.35)}
+.icon-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.fab{position:fixed;bottom:82px;right:18px;width:54px;height:54px;background:var(--accent);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(245,166,35,.4);z-index:50}
+.fab:active{transform:scale(.92)}
+.fab svg{width:26px;height:26px;stroke:#1a1300;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-end}
+.ov.open{display:flex}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:88vh;overflow-y:auto;animation:up .22s ease}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-h h3{font-size:17px;font-weight:800}
+
+.item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.item-main{flex:1;min-width:0}
+.item-t{font-size:14px;font-weight:700}
+.item-s{font-size:12px;color:var(--muted);margin-top:2px}
+.item-actions{display:flex;gap:6px;flex-shrink:0;margin-top:8px}
+
+#toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:#1a2e2a;color:var(--accent);padding:10px 18px;border-radius:100px;font-size:13px;font-weight:700;opacity:0;transition:opacity .25s;z-index:300;pointer-events:none;white-space:nowrap}
+
+.report-only{display:none}
+@media print{
+  #nav,#topbar,.fab,.no-print{display:none!important}
+  #app{padding-bottom:0}
+  body{background:#fff;color:#111}
+  .page{display:none!important}
+  .page.printing{display:block!important}
+  .report-only{display:block!important}
+  .card{border:1px solid #ccc;background:#fff;color:#111}
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <span class="tb-title">🛡 PRL Minero</span>
+  <select id="selEmpresa" class="inp" onchange="onEmpresaChange()" style="width:auto"></select>
+</div>
+
+<div id="app">
+
+<!-- DASHBOARD -->
+<div class="page active" id="p-dash">
+  <div class="ph"><span class="pt">Panel de Gestión</span></div>
+  <div class="ps" id="dash-empresa-lbl">Todas las empresas</div>
+  <div class="kpis" id="dash-kpis"></div>
+  <div class="sl">Vencimientos críticos</div>
+  <div class="px" id="dash-venc-criticos"></div>
+  <div class="sl">Riesgos prioritarios</div>
+  <div class="px" id="dash-riesgos-top"></div>
+  <div class="sl">Hallazgos abiertos</div>
+  <div class="px" id="dash-hall-abiertos"></div>
+  <div class="px" style="margin-top:6px"><button class="btn-s no-print" onclick="generarInforme()">Generar informe (imprimir / PDF)</button></div>
+</div>
+
+<!-- VENCIMIENTOS -->
+<div class="page" id="p-venc">
+  <div class="ph"><span class="pt">Vencimientos</span></div>
+  <div class="ps">Capacitaciones DS132, exámenes ocupacionales, EPP, certificaciones de equipos y elementos de emergencia.</div>
+  <div class="px" id="lista-venc"></div>
+</div>
+
+<!-- RIESGOS -->
+<div class="page" id="p-riesgo">
+  <div class="ph"><span class="pt">Matriz de Riesgos</span></div>
+  <div class="ps">Peligros identificados por proceso, con nivel de riesgo (probabilidad × severidad) y medidas de control.</div>
+  <div class="px" id="lista-riesgo"></div>
+</div>
+
+<!-- HALLAZGOS -->
+<div class="page" id="p-hall">
+  <div class="ph"><span class="pt">Hallazgos</span></div>
+  <div class="ps">Registro de inspecciones y no conformidades. El cierre lo ejecuta y confirma el cliente.</div>
+  <div class="px" id="lista-hall"></div>
+</div>
+
+<!-- EMPRESAS -->
+<div class="page" id="p-emp">
+  <div class="ph"><span class="pt">Empresas</span></div>
+  <div class="ps">Cartera de clientes bajo asesoría.</div>
+  <div class="px" id="lista-emp"></div>
+</div>
+
+<!-- REPORT (impresión) -->
+<div class="page report-only" id="p-report">
+  <div style="padding:24px">
+    <h2 style="font-size:20px;margin-bottom:4px">Informe de Gestión de Prevención de Riesgos</h2>
+    <div id="rep-meta" style="font-size:13px;color:#555;margin-bottom:18px"></div>
+    <div id="rep-body"></div>
+    <div style="margin-top:32px;font-size:12px;color:#555">
+      Asesor en Prevención de Riesgos — Registro Sernageomin B N°: ______________<br>
+      Firma: ______________________________&nbsp;&nbsp;&nbsp;Fecha: ______________
+    </div>
+  </div>
+</div>
+
+</div>
+
+<nav id="nav">
+  <button class="nb active" onclick="navTo('p-dash',this)">
+    <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/></svg>
+    <span class="nb-lbl">Panel</span>
+  </button>
+  <button class="nb" onclick="navTo('p-venc',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    <span class="nb-lbl">Vencim.</span>
+  </button>
+  <button class="nb" onclick="navTo('p-riesgo',this)">
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 20h20L12 2z"/><path d="M12 9v4M12 17h.01"/></svg>
+    <span class="nb-lbl">Riesgos</span>
+  </button>
+  <button class="nb" onclick="navTo('p-hall',this)">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    <span class="nb-lbl">Hallazgos</span>
+  </button>
+  <button class="nb" onclick="navTo('p-emp',this)">
+    <svg viewBox="0 0 24 24"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/></svg>
+    <span class="nb-lbl">Empresas</span>
+  </button>
+</nav>
+
+<button class="fab no-print" onclick="fabAction()">
+  <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<div id="toast"></div>
+
+<!-- MODALES -->
+<div class="ov" id="ov-emp"><div class="modal">
+  <div class="modal-h"><h3>Empresa</h3><button class="icon-btn" onclick="cerrarModal('ov-emp')">✕</button></div>
+  <form onsubmit="return guardarEmpresa(event)">
+    <input type="hidden" id="emp-id">
+    <div class="fg"><span class="lbl">Nombre / Razón social</span><input class="inp" id="emp-nombre" required></div>
+    <div class="row2">
+      <div class="fg"><span class="lbl">RUT</span><input class="inp" id="emp-rut"></div>
+      <div class="fg"><span class="lbl">N° trabajadores</span><input class="inp" id="emp-trab" type="number" min="0"></div>
+    </div>
+    <div class="fg"><span class="lbl">Faena / Región</span><input class="inp" id="emp-faena" placeholder="Ej: Faena Los Bronces, Región Metropolitana"></div>
+    <div class="row2">
+      <div class="fg"><span class="lbl">Contacto</span><input class="inp" id="emp-contacto"></div>
+      <div class="fg"><span class="lbl">Teléfono</span><input class="inp" id="emp-tel"></div>
+    </div>
+    <button class="btn-p" type="submit">Guardar</button>
+  </form>
+</div></div>
+
+<div class="ov" id="ov-venc"><div class="modal">
+  <div class="modal-h"><h3>Vencimiento</h3><button class="icon-btn" onclick="cerrarModal('ov-venc')">✕</button></div>
+  <form onsubmit="return guardarVenc(event)">
+    <input type="hidden" id="venc-id">
+    <div class="fg"><span class="lbl">Empresa</span><select class="inp" id="venc-empresa" required></select></div>
+    <div class="fg"><span class="lbl">Tipo</span>
+      <select class="inp" id="venc-tipo">
+        <option>Capacitación DS132</option>
+        <option>Examen ocupacional</option>
+        <option>EPP</option>
+        <option>Certificación de equipo</option>
+        <option>Extintor / Emergencia</option>
+        <option>Otro</option>
+      </select>
+    </div>
+    <div class="fg"><span class="lbl">Ítem / descripción</span><input class="inp" id="venc-item" placeholder="Ej: Inducción minera OMA - Juan Pérez" required></div>
+    <div class="fg"><span class="lbl">Fecha de vencimiento</span><input class="inp" id="venc-fecha" type="date" required></div>
+    <div class="fg"><span class="lbl">Notas</span><textarea class="inp" id="venc-notas"></textarea></div>
+    <button class="btn-p" type="submit">Guardar</button>
+  </form>
+</div></div>
+
+<div class="ov" id="ov-riesgo"><div class="modal">
+  <div class="modal-h"><h3>Riesgo</h3><button class="icon-btn" onclick="cerrarModal('ov-riesgo')">✕</button></div>
+  <form onsubmit="return guardarRiesgo(event)">
+    <input type="hidden" id="riesgo-id">
+    <div class="fg"><span class="lbl">Empresa</span><select class="inp" id="riesgo-empresa" required></select></div>
+    <div class="fg"><span class="lbl">Proceso / área</span><input class="inp" id="riesgo-proceso" placeholder="Ej: Perforación, Movimiento de tierra" required></div>
+    <div class="fg"><span class="lbl">Peligro identificado</span><input class="inp" id="riesgo-peligro" required></div>
+    <div class="fg"><span class="lbl">Riesgo / consecuencia</span><input class="inp" id="riesgo-desc" required></div>
+    <div class="row2">
+      <div class="fg"><span class="lbl">Probabilidad (1-5)</span>
+        <select class="inp" id="riesgo-prob"><option value="1">1 - Rara vez</option><option value="2">2 - Improbable</option><option value="3" selected>3 - Posible</option><option value="4">4 - Probable</option><option value="5">5 - Casi certeza</option></select>
+      </div>
+      <div class="fg"><span class="lbl">Severidad (1-5)</span>
+        <select class="inp" id="riesgo-sev"><option value="1">1 - Leve</option><option value="2">2 - Menor</option><option value="3" selected>3 - Moderada</option><option value="4">4 - Grave</option><option value="5">5 - Fatal</option></select>
+      </div>
+    </div>
+    <div class="fg"><span class="lbl">Medidas de control</span><textarea class="inp" id="riesgo-medidas"></textarea></div>
+    <div class="fg"><span class="lbl">Responsable de la medida</span><input class="inp" id="riesgo-resp"></div>
+    <button class="btn-p" type="submit">Guardar</button>
+  </form>
+</div></div>
+
+<div class="ov" id="ov-hall"><div class="modal">
+  <div class="modal-h"><h3>Hallazgo</h3><button class="icon-btn" onclick="cerrarModal('ov-hall')">✕</button></div>
+  <form onsubmit="return guardarHallazgo(event)">
+    <input type="hidden" id="hall-id">
+    <div class="fg"><span class="lbl">Empresa</span><select class="inp" id="hall-empresa" required></select></div>
+    <div class="fg"><span class="lbl">Área</span><input class="inp" id="hall-area" required></div>
+    <div class="fg"><span class="lbl">Descripción</span><textarea class="inp" id="hall-desc" required></textarea></div>
+    <div class="fg"><span class="lbl">Criticidad</span>
+      <select class="inp" id="hall-crit"><option value="baja">Baja</option><option value="media" selected>Media</option><option value="alta">Alta</option><option value="critica">Crítica</option></select>
+    </div>
+    <button class="btn-p" type="submit">Guardar</button>
+  </form>
+</div></div>
+
+<script>
+const LS_KEY = 'prlMineroDB_v1';
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return { empresas:[], venc:[], riesgos:[], hallazgos:[] };
+    const d = JSON.parse(raw);
+    return { empresas:d.empresas||[], venc:d.venc||[], riesgos:d.riesgos||[], hallazgos:d.hallazgos||[] };
+  } catch(e) { return { empresas:[], venc:[], riesgos:[], hallazgos:[] }; }
+}
+function saveDB() { localStorage.setItem(LS_KEY, JSON.stringify(DB)); }
+let DB = loadDB();
+let empresaActiva = localStorage.getItem('prlEmpresaActiva') || '';
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function esc(s) { return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function hoy() { return new Date().toISOString().split('T')[0]; }
+function fmtDate(d) { if(!d) return '—'; try { return new Date(d+'T12:00:00').toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'}); } catch(e){ return d; } }
+function diasHasta(fecha) { const a=new Date(fecha+'T00:00:00'), b=new Date(hoy()+'T00:00:00'); return Math.round((a-b)/86400000); }
+function estadoVenc(fecha) { const d=diasHasta(fecha); if(d<0) return 'vencido'; if(d<=15) return 'urgente'; if(d<=30) return 'pronto'; return 'ok'; }
+function estadoVencLbl(e) { return {vencido:'Vencido',urgente:'Urgente',pronto:'Próximo',ok:'Al día'}[e]; }
+function nivelRiesgo(prob,sev) { const s=prob*sev; if(s<=4) return 'bajo'; if(s<=9) return 'medio'; if(s<=14) return 'alto'; return 'critico'; }
+function nivelRiesgoLbl(n) { return {bajo:'Bajo',medio:'Medio',alto:'Alto',critico:'Crítico'}[n]; }
+function nombreEmpresa(id) { const e = DB.empresas.find(x=>x.id===id); return e ? e.nombre : '—'; }
+
+let _toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.opacity = '1';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>el.style.opacity='0', 2200);
+}
+function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function navTo(id, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  render();
+}
+
+function empresasFiltroIds() { return empresaActiva ? [empresaActiva] : DB.empresas.map(e=>e.id); }
+function filtrar(arr) { const ids = empresasFiltroIds(); return arr.filter(x => ids.includes(x.empresaId)); }
+
+function poblarSelectsEmpresa() {
+  const opciones = DB.empresas.map(e => `<option value="${e.id}">${esc(e.nombre)}</option>`).join('');
+  const top = document.getElementById('selEmpresa');
+  top.innerHTML = `<option value="">— Todas las empresas —</option>` + opciones;
+  top.value = empresaActiva;
+  ['venc-empresa','riesgo-empresa','hall-empresa'].forEach(id => {
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = opciones || '<option value="">Sin empresas registradas</option>';
+    if (cur) sel.value = cur;
+  });
+}
+function onEmpresaChange() {
+  empresaActiva = document.getElementById('selEmpresa').value;
+  localStorage.setItem('prlEmpresaActiva', empresaActiva);
+  render();
+}
+
+function render() {
+  poblarSelectsEmpresa();
+  const activa = document.querySelector('.page.active');
+  if (!activa) return;
+  const id = activa.id;
+  if (id==='p-dash') renderDashboard();
+  if (id==='p-venc') renderVenc();
+  if (id==='p-riesgo') renderRiesgo();
+  if (id==='p-hall') renderHallazgos();
+  if (id==='p-emp') renderEmpresas();
+}
+
+function renderDashboard() {
+  document.getElementById('dash-empresa-lbl').textContent = empresaActiva ? nombreEmpresa(empresaActiva) : 'Todas las empresas';
+  const venc = filtrar(DB.venc);
+  const riesgos = filtrar(DB.riesgos);
+  const hall = filtrar(DB.hallazgos);
+
+  const vVencidos = venc.filter(v => estadoVenc(v.fecha)==='vencido').length;
+  const vUrgentes = venc.filter(v => estadoVenc(v.fecha)==='urgente').length;
+  const rAltos = riesgos.filter(r => ['alto','critico'].includes(nivelRiesgo(+r.prob,+r.sev))).length;
+  const hAbiertos = hall.filter(h => h.estado!=='cerrado').length;
+
+  document.getElementById('dash-kpis').innerHTML = `
+    <div class="kpi c-danger"><div class="kpi-n">${vVencidos}</div><div class="kpi-l">Vencidos</div></div>
+    <div class="kpi c-warn"><div class="kpi-n">${vUrgentes}</div><div class="kpi-l">Vencen ≤15 días</div></div>
+    <div class="kpi c-accent"><div class="kpi-n">${rAltos}</div><div class="kpi-l">Riesgos alto/crítico</div></div>
+    <div class="kpi c-green"><div class="kpi-n">${hAbiertos}</div><div class="kpi-l">Hallazgos abiertos</div></div>
+  `;
+
+  const critVenc = venc.filter(v => ['vencido','urgente'].includes(estadoVenc(v.fecha)))
+    .sort((a,b)=>diasHasta(a.fecha)-diasHasta(b.fecha)).slice(0,5);
+  document.getElementById('dash-venc-criticos').innerHTML = critVenc.length ? critVenc.map(v => `
+    <div class="card-sm item">
+      <div class="item-main"><div class="item-t">${esc(v.item)}</div><div class="item-s">${esc(nombreEmpresa(v.empresaId))} · ${esc(v.tipo)} · ${fmtDate(v.fecha)}</div></div>
+      <span class="badge b-${estadoVenc(v.fecha)}">${estadoVencLbl(estadoVenc(v.fecha))}</span>
+    </div>`).join('') : '<div class="empty">Sin vencimientos críticos</div>';
+
+  const topRiesgos = [...riesgos].sort((a,b)=> (+b.prob*+b.sev)-(+a.prob*+a.sev)).slice(0,5);
+  document.getElementById('dash-riesgos-top').innerHTML = topRiesgos.length ? topRiesgos.map(r => {
+    const n = nivelRiesgo(+r.prob,+r.sev);
+    return `<div class="card-sm item">
+      <div class="item-main"><div class="item-t">${esc(r.peligro)}</div><div class="item-s">${esc(nombreEmpresa(r.empresaId))} · ${esc(r.proceso)}</div></div>
+      <span class="badge b-${n}">${nivelRiesgoLbl(n)}</span>
+    </div>`;
+  }).join('') : '<div class="empty">Sin riesgos registrados</div>';
+
+  const abiertos = hall.filter(h => h.estado!=='cerrado').slice(0,5);
+  document.getElementById('dash-hall-abiertos').innerHTML = abiertos.length ? abiertos.map(h => `
+    <div class="card-sm item">
+      <div class="item-main"><div class="item-t">${esc(h.descripcion)}</div><div class="item-s">${esc(nombreEmpresa(h.empresaId))} · ${esc(h.area)}</div></div>
+      <span class="badge b-${h.criticidad}">${nivelRiesgoLbl(h.criticidad)||h.criticidad}</span>
+    </div>`).join('') : '<div class="empty">Sin hallazgos abiertos</div>';
+}
+
+function renderVenc() {
+  const lista = filtrar(DB.venc).sort((a,b)=>diasHasta(a.fecha)-diasHasta(b.fecha));
+  document.getElementById('lista-venc').innerHTML = lista.length ? lista.map(v => `
+    <div class="card item">
+      <div class="item-main">
+        <div class="item-t">${esc(v.item)}</div>
+        <div class="item-s">${esc(nombreEmpresa(v.empresaId))} · ${esc(v.tipo)} · vence ${fmtDate(v.fecha)}</div>
+        ${v.notas ? `<div class="item-s">${esc(v.notas)}</div>` : ''}
+        <div class="item-actions">
+          <button class="btn-sm" onclick="editarVenc('${v.id}')">Editar</button>
+          <button class="btn-sm danger" onclick="borrar('venc','${v.id}')">Eliminar</button>
+        </div>
+      </div>
+      <span class="badge b-${estadoVenc(v.fecha)}">${estadoVencLbl(estadoVenc(v.fecha))}</span>
+    </div>`).join('') : '<div class="empty">Sin vencimientos registrados. Usa el botón + para agregar uno.</div>';
+}
+
+function renderRiesgo() {
+  const lista = filtrar(DB.riesgos).sort((a,b)=> (+b.prob*+b.sev)-(+a.prob*+a.sev));
+  document.getElementById('lista-riesgo').innerHTML = lista.length ? lista.map(r => {
+    const n = nivelRiesgo(+r.prob,+r.sev);
+    return `<div class="card item">
+      <div class="item-main">
+        <div class="item-t">${esc(r.peligro)}</div>
+        <div class="item-s">${esc(nombreEmpresa(r.empresaId))} · ${esc(r.proceso)}</div>
+        <div class="item-s">Consecuencia: ${esc(r.desc||r.riesgoDesc||'')}</div>
+        ${r.medidas ? `<div class="item-s">Control: ${esc(r.medidas)}</div>` : ''}
+        ${r.resp ? `<div class="item-s">Responsable: ${esc(r.resp)}</div>` : ''}
+        <div class="item-actions">
+          <button class="btn-sm" onclick="editarRiesgo('${r.id}')">Editar</button>
+          <button class="btn-sm danger" onclick="borrar('riesgos','${r.id}')">Eliminar</button>
+        </div>
+      </div>
+      <span class="badge b-${n}">${nivelRiesgoLbl(n)}</span>
+    </div>`;
+  }).join('') : '<div class="empty">Sin riesgos registrados. Usa el botón + para agregar uno.</div>';
+}
+
+function renderHallazgos() {
+  const lista = filtrar(DB.hallazgos).sort((a,b)=> (a.estado==='cerrado')-(b.estado==='cerrado'));
+  document.getElementById('lista-hall').innerHTML = lista.length ? lista.map(h => `
+    <div class="card item">
+      <div class="item-main">
+        <div class="item-t">${esc(h.descripcion)}</div>
+        <div class="item-s">${esc(nombreEmpresa(h.empresaId))} · ${esc(h.area)} · ${fmtDate(h.fecha)}</div>
+        ${h.resueltoPor ? `<div class="item-s">Cerrado por: ${esc(h.resueltoPor)} el ${fmtDate(h.fechaCierre)}</div>` : ''}
+        <div class="item-actions">
+          ${h.estado!=='cerrado' ? `<button class="btn-sm ok" onclick="cerrarHallazgo('${h.id}')">Marcar cerrado por el cliente</button>` : ''}
+          <button class="btn-sm danger" onclick="borrar('hallazgos','${h.id}')">Eliminar</button>
+        </div>
+      </div>
+      <span class="badge b-${h.estado==='cerrado'?'cerrado':h.criticidad}">${h.estado==='cerrado'?'Cerrado':nivelRiesgoLbl(h.criticidad)||h.criticidad}</span>
+    </div>`).join('') : '<div class="empty">Sin hallazgos registrados. Usa el botón + para agregar uno.</div>';
+}
+
+function renderEmpresas() {
+  document.getElementById('lista-emp').innerHTML = DB.empresas.length ? DB.empresas.map(e => `
+    <div class="card item">
+      <div class="item-main">
+        <div class="item-t">${esc(e.nombre)}</div>
+        <div class="item-s">${esc(e.faena||'Sin faena registrada')} · ${e.trabajadores||0} trabajadores</div>
+        <div class="item-s">${esc(e.contacto||'')} ${e.tel?'· '+esc(e.tel):''}</div>
+        <div class="item-actions">
+          <button class="btn-sm" onclick="editarEmpresa('${e.id}')">Editar</button>
+          <button class="btn-sm danger" onclick="borrar('empresas','${e.id}')">Eliminar</button>
+        </div>
+      </div>
+    </div>`).join('') : '<div class="empty">Sin empresas registradas. Usa el botón + para agregar la primera.</div>';
+}
+
+// ---- FAB: abre el modal correspondiente a la página activa ----
+function fabAction() {
+  const id = document.querySelector('.page.active').id;
+  if (id==='p-dash' || id==='p-emp') { limpiarForm('emp'); abrirModal('ov-emp'); }
+  else if (id==='p-venc') { limpiarForm('venc'); document.getElementById('venc-fecha').value = hoy(); abrirModal('ov-venc'); }
+  else if (id==='p-riesgo') { limpiarForm('riesgo'); abrirModal('ov-riesgo'); }
+  else if (id==='p-hall') { limpiarForm('hall'); abrirModal('ov-hall'); }
+}
+function limpiarForm(prefix) {
+  document.querySelectorAll(`[id^="${prefix}-"]`).forEach(el => {
+    if (el.tagName==='SELECT') el.selectedIndex = el.id.endsWith('-empresa') ? (empresaActiva ? [...el.options].findIndex(o=>o.value===empresaActiva) : 0) : 0;
+    else el.value = '';
+  });
+}
+
+// ---- CRUD Empresas ----
+function guardarEmpresa(ev) {
+  ev.preventDefault();
+  const id = document.getElementById('emp-id').value || uid();
+  const data = {
+    id, nombre: document.getElementById('emp-nombre').value.trim(),
+    rut: document.getElementById('emp-rut').value.trim(),
+    trabajadores: +document.getElementById('emp-trab').value || 0,
+    faena: document.getElementById('emp-faena').value.trim(),
+    contacto: document.getElementById('emp-contacto').value.trim(),
+    tel: document.getElementById('emp-tel').value.trim()
+  };
+  const i = DB.empresas.findIndex(e=>e.id===id);
+  if (i>=0) DB.empresas[i] = data; else DB.empresas.push(data);
+  saveDB(); cerrarModal('ov-emp'); toast('Empresa guardada'); render();
+  return false;
+}
+function editarEmpresa(id) {
+  const e = DB.empresas.find(x=>x.id===id); if(!e) return;
+  document.getElementById('emp-id').value = e.id;
+  document.getElementById('emp-nombre').value = e.nombre;
+  document.getElementById('emp-rut').value = e.rut||'';
+  document.getElementById('emp-trab').value = e.trabajadores||'';
+  document.getElementById('emp-faena').value = e.faena||'';
+  document.getElementById('emp-contacto').value = e.contacto||'';
+  document.getElementById('emp-tel').value = e.tel||'';
+  abrirModal('ov-emp');
+}
+
+// ---- CRUD Vencimientos ----
+function guardarVenc(ev) {
+  ev.preventDefault();
+  const id = document.getElementById('venc-id').value || uid();
+  const data = {
+    id, empresaId: document.getElementById('venc-empresa').value,
+    tipo: document.getElementById('venc-tipo').value,
+    item: document.getElementById('venc-item').value.trim(),
+    fecha: document.getElementById('venc-fecha').value,
+    notas: document.getElementById('venc-notas').value.trim()
+  };
+  if (!data.empresaId) { toast('Registra una empresa primero'); return false; }
+  const i = DB.venc.findIndex(v=>v.id===id);
+  if (i>=0) DB.venc[i] = data; else DB.venc.push(data);
+  saveDB(); cerrarModal('ov-venc'); toast('Vencimiento guardado'); render();
+  return false;
+}
+function editarVenc(id) {
+  const v = DB.venc.find(x=>x.id===id); if(!v) return;
+  document.getElementById('venc-id').value = v.id;
+  document.getElementById('venc-empresa').value = v.empresaId;
+  document.getElementById('venc-tipo').value = v.tipo;
+  document.getElementById('venc-item').value = v.item;
+  document.getElementById('venc-fecha').value = v.fecha;
+  document.getElementById('venc-notas').value = v.notas||'';
+  abrirModal('ov-venc');
+}
+
+// ---- CRUD Riesgos ----
+function guardarRiesgo(ev) {
+  ev.preventDefault();
+  const id = document.getElementById('riesgo-id').value || uid();
+  const data = {
+    id, empresaId: document.getElementById('riesgo-empresa').value,
+    proceso: document.getElementById('riesgo-proceso').value.trim(),
+    peligro: document.getElementById('riesgo-peligro').value.trim(),
+    desc: document.getElementById('riesgo-desc').value.trim(),
+    prob: +document.getElementById('riesgo-prob').value,
+    sev: +document.getElementById('riesgo-sev').value,
+    medidas: document.getElementById('riesgo-medidas').value.trim(),
+    resp: document.getElementById('riesgo-resp').value.trim()
+  };
+  if (!data.empresaId) { toast('Registra una empresa primero'); return false; }
+  const i = DB.riesgos.findIndex(r=>r.id===id);
+  if (i>=0) DB.riesgos[i] = data; else DB.riesgos.push(data);
+  saveDB(); cerrarModal('ov-riesgo'); toast('Riesgo guardado'); render();
+  return false;
+}
+function editarRiesgo(id) {
+  const r = DB.riesgos.find(x=>x.id===id); if(!r) return;
+  document.getElementById('riesgo-id').value = r.id;
+  document.getElementById('riesgo-empresa').value = r.empresaId;
+  document.getElementById('riesgo-proceso').value = r.proceso;
+  document.getElementById('riesgo-peligro').value = r.peligro;
+  document.getElementById('riesgo-desc').value = r.desc||'';
+  document.getElementById('riesgo-prob').value = r.prob;
+  document.getElementById('riesgo-sev').value = r.sev;
+  document.getElementById('riesgo-medidas').value = r.medidas||'';
+  document.getElementById('riesgo-resp').value = r.resp||'';
+  abrirModal('ov-riesgo');
+}
+
+// ---- CRUD Hallazgos ----
+function guardarHallazgo(ev) {
+  ev.preventDefault();
+  const id = document.getElementById('hall-id').value || uid();
+  const data = {
+    id, empresaId: document.getElementById('hall-empresa').value,
+    area: document.getElementById('hall-area').value.trim(),
+    descripcion: document.getElementById('hall-desc').value.trim(),
+    criticidad: document.getElementById('hall-crit').value,
+    fecha: hoy(), estado: 'abierto'
+  };
+  if (!data.empresaId) { toast('Registra una empresa primero'); return false; }
+  DB.hallazgos.push(data);
+  saveDB(); cerrarModal('ov-hall'); toast('Hallazgo registrado'); render();
+  return false;
+}
+function cerrarHallazgo(id) {
+  const h = DB.hallazgos.find(x=>x.id===id); if(!h) return;
+  const quien = prompt('¿Quién cierra este hallazgo en la empresa cliente?');
+  if (!quien) return;
+  h.estado = 'cerrado'; h.resueltoPor = quien; h.fechaCierre = hoy();
+  saveDB(); toast('Hallazgo cerrado'); render();
+}
+
+function borrar(coleccion, id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  DB[coleccion] = DB[coleccion].filter(x=>x.id!==id);
+  saveDB(); toast('Eliminado'); render();
+}
+
+// ---- Informe imprimible ----
+function generarInforme() {
+  const venc = filtrar(DB.venc).filter(v=>estadoVenc(v.fecha)!=='ok').sort((a,b)=>diasHasta(a.fecha)-diasHasta(b.fecha));
+  const riesgos = filtrar(DB.riesgos).filter(r=>['alto','critico'].includes(nivelRiesgo(+r.prob,+r.sev))).sort((a,b)=>(+b.prob*+b.sev)-(+a.prob*+a.sev));
+  const hall = filtrar(DB.hallazgos).filter(h=>h.estado!=='cerrado');
+
+  document.getElementById('rep-meta').innerHTML =
+    `Empresa: ${esc(empresaActiva ? nombreEmpresa(empresaActiva) : 'Todas las empresas de la cartera')}<br>Fecha de emisión: ${fmtDate(hoy())}`;
+
+  document.getElementById('rep-body').innerHTML = `
+    <h3 style="font-size:15px;margin:16px 0 6px">1. Vencimientos pendientes de gestión (${venc.length})</h3>
+    ${venc.length ? venc.map(v=>`<div class="card">${esc(v.item)} — ${esc(v.tipo)} — ${esc(nombreEmpresa(v.empresaId))} — vence ${fmtDate(v.fecha)} (${estadoVencLbl(estadoVenc(v.fecha))})</div>`).join('') : '<p>Sin pendientes.</p>'}
+    <h3 style="font-size:15px;margin:16px 0 6px">2. Riesgos alto/crítico identificados (${riesgos.length})</h3>
+    ${riesgos.length ? riesgos.map(r=>`<div class="card">${esc(r.peligro)} — ${esc(nombreEmpresa(r.empresaId))} / ${esc(r.proceso)} — Nivel: ${nivelRiesgoLbl(nivelRiesgo(+r.prob,+r.sev))}<br>Medida propuesta: ${esc(r.medidas||'Pendiente de definir')} — Responsable en la empresa: ${esc(r.resp||'Por asignar')}</div>`).join('') : '<p>Sin riesgos alto/crítico abiertos.</p>'}
+    <h3 style="font-size:15px;margin:16px 0 6px">3. Hallazgos abiertos (${hall.length})</h3>
+    ${hall.length ? hall.map(h=>`<div class="card">${esc(h.descripcion)} — ${esc(nombreEmpresa(h.empresaId))} / ${esc(h.area)} — Criticidad: ${nivelRiesgoLbl(h.criticidad)||h.criticidad}</div>`).join('') : '<p>Sin hallazgos abiertos.</p>'}
+    <p style="margin-top:16px;font-size:12px;color:#555">Este informe entrega el diagnóstico y las recomendaciones técnicas del asesor. La ejecución de las medidas y el cierre de cada pendiente son responsabilidad de la empresa cliente.</p>
+  `;
+
+  document.getElementById('p-report').classList.add('printing');
+  window.print();
+  setTimeout(()=>document.getElementById('p-report').classList.remove('printing'), 500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.ov').forEach(ov => {
+    ov.addEventListener('click', e => { if(e.target===ov) ov.classList.remove('open'); });
+  });
+  render();
+});
+</script>
+</body>
+</html>
