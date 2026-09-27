@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AuditaCC · Auditor de Controles Críticos</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%223%22 fill=%22%230f4c75%22/%3E%3Cpath d=%22M4 8.5l2.5 2.5L12 5%22 stroke=%22white%22 stroke-width=%222%22 fill=%22none%22/%3E%3C/svg%3E">
+<meta name="description" content="Auditoría documental de controles críticos para riesgos de fatalidad en minería.">
+<style>
+  :root {
+    --bg: #f5f6f8; --panel: #ffffff; --ink: #16202b; --muted: #5b6776; --line: #dde2e8;
+    --brand: #0f4c75; --brand-ink: #ffffff; --ok: #1d7a46; --ok-bg: #e5f4ec; --bad: #b42318; --bad-bg: #fdecea;
+    --warn: #9a5b00; --warn-bg: #fff4de; --info: #1f5f99; --info-bg: #e7f0fa; --code: #eef1f5;
+    --radius: 10px; --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f141a; --panel: #171e26; --ink: #e6ebf1; --muted: #9aa6b4; --line: #2a343f;
+      --brand: #4fa3d9; --brand-ink: #0b1218; --ok: #5cc98c; --ok-bg: #16301f; --bad: #ff8a80; --bad-bg: #3a1b19;
+      --warn: #ffc163; --warn-bg: #3a2c12; --info: #8cc4f5; --info-bg: #15283b; --code: #212a34;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header.top { background: var(--brand); color: var(--brand-ink); padding: 14px 16px; }
+  header.top .in { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  header.top h1 { font-size: 19px; margin: 0; letter-spacing: .2px; }
+  header.top small { opacity: .85; }
+  header.top .cliente { margin-left: auto; font-size: 13px; opacity: .9; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; margin-bottom: 16px; }
+  h2 { font-size: 17px; margin: 0 0 12px; }
+  h3 { font-size: 15px; margin: 18px 0 8px; }
+  label { display: block; font-weight: 600; font-size: 13px; margin: 10px 0 4px; }
+  input[type=text], input[type=password], select, textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); font: inherit;
+  }
+  textarea { min-height: 64px; resize: vertical; }
+  .fila { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 700px) { .fila { grid-template-columns: 1fr; } }
+  button { font: inherit; font-weight: 600; border: 0; border-radius: 8px; padding: 10px 16px; cursor: pointer; background: var(--brand); color: var(--brand-ink); }
+  button.sec { background: transparent; color: var(--brand); border: 1px solid var(--brand); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .acciones { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  .drop { border: 2px dashed var(--line); border-radius: var(--radius); padding: 22px; text-align: center; color: var(--muted); cursor: pointer; }
+  .drop.sobre { border-color: var(--brand); color: var(--brand); }
+  .drop strong { color: var(--ink); }
+  .nota { font-size: 13px; color: var(--muted); }
+  .error { background: var(--bad-bg); color: var(--bad); padding: 10px 12px; border-radius: 8px; margin-top: 10px; }
+  .oculto { display: none !important; }
+  .kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+  @media (max-width: 700px) { .kpis { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+  .kpi { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  .kpi b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: 12px; color: var(--muted); }
+  .bitacora { max-height: 260px; overflow: auto; font-size: 13px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: var(--code); margin-top: 12px; }
+  .bitacora div { padding: 2px 0; border-bottom: 1px dashed var(--line); }
+  .bitacora div:last-child { border: 0; }
+  .barra { height: 6px; background: var(--code); border-radius: 99px; overflow: hidden; margin-top: 12px; }
+  .barra i { display: block; height: 100%; width: 30%; background: var(--brand); animation: carga 1.4s infinite ease-in-out; }
+  @keyframes carga { 0% { margin-left: -30%; } 100% { margin-left: 100%; } }
+  .veredicto { border-radius: var(--radius); padding: 16px 18px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .veredicto.si { background: var(--ok-bg); color: var(--ok); }
+  .veredicto.no { background: var(--bad-bg); color: var(--bad); }
+  .veredicto .grande { font-size: 26px; font-weight: 800; letter-spacing: .5px; }
+  .veredicto p { margin: 0; color: var(--ink); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; vertical-align: top; padding: 7px 8px; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .tabla { overflow-x: auto; }
+  .chip { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .chip.SI { background: var(--ok-bg); color: var(--ok); }
+  .chip.NO, .chip.CRITICO { background: var(--bad-bg); color: var(--bad); }
+  .chip.NOEVALUADO, .chip.MAYOR { background: var(--warn-bg); color: var(--warn); }
+  .chip.MENOR, .chip.OBSERVACION { background: var(--info-bg); color: var(--info); }
+  .rf { border: 1px solid var(--line); border-radius: 8px; margin: 10px 0; overflow: hidden; }
+  .rf > header { display: flex; gap: 10px; align-items: center; padding: 10px 12px; background: var(--code); flex-wrap: wrap; }
+  .rf > header b { flex: 1; min-width: 180px; }
+  .cita { font-style: italic; color: var(--muted); border-left: 3px solid var(--line); padding-left: 8px; margin-top: 4px; word-break: break-word; }
+  .hallazgo { border-left: 4px solid var(--line); padding: 8px 12px; margin: 8px 0; background: var(--panel); }
+  .hallazgo.CRITICO { border-color: var(--bad); } .hallazgo.MAYOR { border-color: var(--warn); } .hallazgo.MENOR, .hallazgo.OBSERVACION { border-color: var(--info); }
+  .hallazgo .meta { font-size: 12px; color: var(--muted); }
+  .check td:first-child { width: 28px; }
+  .caja { width: 16px; height: 16px; border: 1.5px solid var(--muted); display: inline-block; border-radius: 3px; }
+  .pre { font-size: 13px; }
+  .pre li { margin: 4px 0; }
+  footer.pie { font-size: 12px; color: var(--muted); margin-top: 14px; }
+  .solo-impresion { display: none; }
+  @media print {
+    body { background: #fff; color: #000; font-size: 11px; }
+    header.top, .no-imprimir, #panelAcceso, #panelDocumento, #panelProgreso { display: none !important; }
+    .solo-impresion { display: block; }
+    main { max-width: none; padding: 0; }
+    .panel { box-shadow: none; border: 0; padding: 0; }
+    .rf, .hallazgo { break-inside: avoid; }
+    .bitacora { display: none; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="in">
+    <h1>AuditaCC</h1>
+    <small>Auditoría documental de controles críticos · Riesgos de fatalidad</small>
+    <span class="cliente" id="lblCliente"></span>
+  </div>
+</header>
+
+<main>
+  <!-- 1. Acceso -->
+  <section class="panel" id="panelAcceso">
+    <h2>Acceso</h2>
+    <p class="nota">Ingrese el código de acceso entregado por su consultor.</p>
+    <label for="codigo">Código de acceso</label>
+    <input id="codigo" type="password" autocomplete="off" placeholder="Ej. EMPRESA-2026">
+    <div class="acciones"><button id="btnAcceso">Ingresar</button></div>
+    <div id="errAcceso" class="error oculto"></div>
+  </section>
+
+  <!-- 2. Documento -->
+  <section class="panel oculto" id="panelDocumento">
+    <h2>Documento a auditar</h2>
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Seleccionar documento">
+      <strong>Arrastre aquí el documento</strong> o haga clic para seleccionarlo<br>
+      <span class="nota">Excel (.xlsx, .xlsm, .xls), Word (.docx), PDF con texto o .txt · El archivo se lee en su navegador; solo se envía su texto.</span>
+    </div>
+    <input type="file" id="archivo" class="oculto" accept=".xlsx,.xlsm,.xls,.csv,.docx,.pdf,.txt">
+    <p id="infoArchivo" class="nota"></p>
+    <div class="fila">
+      <div>
+        <label for="tipo">Tipo de documento</label>
+        <select id="tipo">
+          <option value="procedimiento">Procedimiento de trabajo / PTS</option>
+          <option value="matriz">Matriz de riesgos (IPER / MIPER)</option>
+          <option value="mapa_proceso">Mapa de proceso</option>
+          <option value="cop">Control Operacional Preventivo (COP)</option>
+          <option value="otro">Otro documento de prevención</option>
+        </select>
+      </div>
+      <div>
+        <label for="contexto">Contexto para el auditor (opcional)</label>
+        <textarea id="contexto" placeholder="Ej. contrato de perforación en tranque de relaves; faena en superficie; no hay operación subterránea."></textarea>
+      </div>
+    </div>
+    <div class="acciones">
+      <button id="btnAuditar" disabled>Auditar con IA</button>
+      <button id="btnPre" class="sec" disabled>Solo pre-análisis (sin IA, sin costo)</button>
+    </div>
+    <div id="errDoc" class="error oculto"></div>
+  </section>
+
+  <!-- 3. Progreso -->
+  <section class="panel oculto" id="panelProgreso">
+    <h2 id="tituloProgreso">Auditoría en curso</h2>
+    <div class="kpis">
+      <div class="kpi"><b id="kPasos">0</b><span>pasos del agente</span></div>
+      <div class="kpi"><b id="kEval">0</b><span>controles evaluados</span></div>
+      <div class="kpi"><b id="kHall">0</b><span>hallazgos</span></div>
+      <div class="kpi"><b id="kCosto">$0</b><span>costo IA (CLP aprox.)</span></div>
+    </div>
+    <div class="barra" id="barra"><i></i></div>
+    <div class="bitacora" id="bitacora" aria-live="polite"></div>
+    <div class="acciones no-imprimir"><button class="sec" id="btnDetener">Detener</button></div>
+    <div id="errProg" class="error oculto"></div>
+  </section>
+
+  <!-- Pre-análisis -->
+  <section class="panel oculto" id="panelPre">
+    <h2>Pre-análisis automático de códigos RF / CC</h2>
+    <p class="nota">Detección por reglas (sin IA). Son indicios a confirmar: el agente los verifica leyendo el documento.</p>
+    <div id="pre" class="pre"></div>
+  </section>
+
+  <!-- 4. Informe -->
+  <section class="panel oculto" id="panelInforme">
+    <div class="solo-impresion"><h1 style="margin:0 0 4px">Informe de auditoría documental de controles críticos</h1></div>
+    <div id="informe"></div>
+    <div class="acciones no-imprimir">
+      <button id="btnImprimir">Imprimir / guardar PDF</button>
+      <button class="sec" id="btnJson">Descargar datos (JSON)</button>
+      <button class="sec" id="btnNuevo">Auditar otro documento</button>
+    </div>
+  </section>
+</main>
+
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="vendor/mammoth.browser.min.js"></script>
+<script src="vendor/pdf.min.js"></script>
+<script type="module">
+import { segmentosDesdeHojas, segmentosDesdeTexto } from "./lib/extraer.js";
+
+const USD_CLP = 950; // referencia aproximada para mostrar costos
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const mostrar = (id, si = true) => $(id).classList.toggle("oculto", !si);
+const clp = (usd) => "$" + Math.round(usd * USD_CLP).toLocaleString("es-CL");
+
+let codigo = "";
+let documento = null; // { nombre, segmentos }
+let detener = false;
+let ultimoInforme = null;
+
+function guardar(k, v) { try { sessionStorage.setItem(k, v); } catch {} }
+function leer(k) { try { return sessionStorage.getItem(k) || ""; } catch { return ""; } }
+
+async function api(cuerpo) {
+  const r = await fetch("/api/auditar", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ codigo, ...cuerpo }) });
+  let j = {};
+  try { j = await r.json(); } catch { j = { error: `Respuesta inválida del servidor (${r.status}).` }; }
+  if (!r.ok) throw Object.assign(new Error(j.error || `Error ${r.status}`), { status: r.status, reintentar: !!j.reintentar });
+  return j;
+}
+
+function error(id, msg) { $(id).textContent = msg; mostrar(id, !!msg); }
+
+// ---------------------------------------------------------------- acceso
+async function ingresar() {
+  error("errAcceso", "");
+  codigo = $("codigo").value.trim();
+  if (!codigo) return error("errAcceso", "Ingrese su código.");
+  $("btnAcceso").disabled = true;
+  try {
+    const j = await api({ accion: "acceso" });
+    guardar("auditacc_codigo", codigo);
+    $("lblCliente").textContent = j.cliente;
+    mostrar("panelAcceso", false);
+    mostrar("panelDocumento");
+  } catch (e) {
+    error("errAcceso", e.message);
+  } finally {
+    $("btnAcceso").disabled = false;
+  }
+}
+$("btnAcceso").onclick = ingresar;
+$("codigo").addEventListener("keydown", (e) => e.key === "Enter" && ingresar());
+if (leer("auditacc_codigo")) { $("codigo").value = leer("auditacc_codigo"); ingresar(); }
+
+// ---------------------------------------------------------------- lectura del archivo (en el navegador)
+const drop = $("drop");
+drop.onclick = () => $("archivo").click();
+drop.onkeydown = (e) => (e.key === "Enter" || e.key === " ") && $("archivo").click();
+drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("sobre"); };
+drop.ondragleave = () => drop.classList.remove("sobre");
+drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove("sobre"); if (e.dataTransfer.files[0]) cargar(e.dataTransfer.files[0]); };
+$("archivo").onchange = (e) => e.target.files[0] && cargar(e.target.files[0]);
+
+function sugerirTipo(nombre) {
+  const n = nombre.toUpperCase();
+  if (/\bCOP\b|COP[_ -]/.test(n)) return "cop";
+  if (/MIPER|IPER|MATRIZ|F-006/.test(n)) return "matriz";
+  if (/MAPA|F-011/.test(n)) return "mapa_proceso";
+  if (/PRO|PTS|PROCED|INSTRUCT/.test(n)) return "procedimiento";
+  return null;
+}
+
+async function cargar(file) {
+  error("errDoc", "");
+  documento = null;
+  $("btnAuditar").disabled = $("btnPre").disabled = true;
+  $("infoArchivo").textContent = `Leyendo ${file.name}…`;
+  try {
+    const ext = file.name.split(".").pop().toLowerCase();
+    const buf = await file.arrayBuffer();
+    let segmentos;
+    if (["xlsx", "xlsm", "xls", "csv"].includes(ext)) {
+      const wb = XLSX.read(buf, { type: "array" });
+      const hojas = wb.SheetNames.map((n) => ({ nombre: n, filas: XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: false, defval: "" }) }));
+      segmentos = segmentosDesdeHojas(hojas);
+    } else if (ext === "docx") {
+      const { value } = await mammoth.extractRawText({ arrayBuffer: buf });
+      segmentos = segmentosDesdeTexto(file.name, value);
+    } else if (ext === "pdf") {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdf.worker.min.js";
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      const paginas = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const c = await (await pdf.getPage(i)).getTextContent();
+        let t = "", y = null;
+        for (const it of c.items) { if (y !== null && Math.abs(it.transform[5] - y) > 2) t += "\n"; t += it.str + (it.hasEOL ? "\n" : " "); y = it.transform[5]; }
+        paginas.push(t);
+      }
+      segmentos = segmentosDesdeTexto(file.name, paginas);
+    } else if (ext === "txt") {
+      segmentos = segmentosDesdeTexto(file.name, await file.text());
+    } else {
+      throw new Error("Formato no soportado. Use Excel, Word (.docx), PDF o .txt. Los .doc antiguos deben guardarse como .docx.");
+    }
+    const caracteres = segmentos.reduce((n, s) => n + s.original.length, 0);
+    if (caracteres < 200) throw new Error("El documento casi no tiene texto legible. Si es un PDF escaneado, aplíquele OCR primero.");
+    documento = { nombre: file.name, segmentos };
+    const t = sugerirTipo(file.name);
+    if (t) $("tipo").value = t;
+    $("infoArchivo").textContent = `${file.name} · ${segmentos.length} sección(es) · ${caracteres.toLocaleString("es-CL")} caracteres`;
+    $("btnAuditar").disabled = $("btnPre").disabled = false;
+  } catch (e) {
+    $("infoArchivo").textContent = "";
+    error("errDoc", `No se pudo leer el archivo: ${e.message}`);
+  }
+}
+
+// ---------------------------------------------------------------- auditoría
+function linea(t) {
+  const d = document.createElement("div");
+  d.textContent = t;
+  $("bitacora").appendChild(d);
+  $("bitacora").scrollTop = $("bitacora").scrollHeight;
+}
+const ICONOS = { lectura: "📄", busqueda: "🔎", marco: "📘", evaluacion: "✅", hallazgo: "⚠️", agente: "💬", fin: "🏁", sistema: "⛔", error: "⛔" };
+
+function actualizar(p) {
+  $("kPasos").textContent = p.pasos;
+  $("kEval").textContent = p.evaluaciones;
+  $("kHall").textContent = p.hallazgos;
+  $("kCosto").textContent = clp(p.usd);
+  for (const b of p.bitacora || []) linea(`${ICONOS[b.tipo] || "•"} ${b.texto}`);
+}
+
+async function iniciar(conIA) {
+  if (!documento) return;
+  error("errDoc", ""); error("errProg", "");
+  $("btnAuditar").disabled = $("btnPre").disabled = true;
+  mostrar("panelInforme", false);
+  $("bitacora").innerHTML = "";
+  let ini;
+  try {
+    ini = await api({ accion: "iniciar", archivo: documento.nombre, tipo: $("tipo").value, contexto: $("contexto").value, segmentos: documento.segmentos });
+  } catch (e) {
+    $("btnAuditar").disabled = $("btnPre").disabled = false;
+    return error("errDoc", e.message);
+  }
+  pintarPre(ini.preanalisis);
+  if (!conIA) { $("btnAuditar").disabled = $("btnPre").disabled = false; $("panelPre").scrollIntoView({ behavior: "smooth" }); return; }
+
+  mostrar("panelProgreso"); mostrar("barra"); mostrar("btnDetener");
+  $("tituloProgreso").textContent = "Auditoría en curso";
+  linea(`📂 ${documento.nombre}: ${ini.documento.segmentos} secciones, ~${ini.documento.tokens_aprox.toLocaleString("es-CL")} tokens`);
+  $("panelProgreso").scrollIntoView({ behavior: "smooth" });
+  detener = false;
+  let estado = ini.estado;
+  let fallos = 0;
+  while (!detener) {
+    try {
+      const r = await api({ accion: "paso", estado });
+      fallos = 0;
+      estado = r.estado;
+      actualizar(r.progreso);
+      if (r.informe) { terminar(r.informe); return; }
+    } catch (e) {
+      if (e.reintentar && fallos < 4) {
+        fallos++;
+        linea(`⏳ ${e.message} (intento ${fallos}/4)`);
+        await new Promise((ok) => setTimeout(ok, 2000 * 2 ** fallos));
+        continue;
+      }
+      error("errProg", `La auditoría se interrumpió: ${e.message}`);
+      break;
+    }
+  }
+  if (detener) linea("⛔ Detenida por el usuario.");
+  mostrar("barra", false); mostrar("btnDetener", false);
+  $("btnAuditar").disabled = $("btnPre").disabled = false;
+}
+$("btnAuditar").onclick = () => iniciar(true);
+$("btnPre").onclick = () => iniciar(false);
+$("btnDetener").onclick = () => { detener = true; };
+
+function pintarPre(pre) {
+  mostrar("panelPre");
+  if (!pre.length) { $("pre").innerHTML = "<p>No se detectaron códigos RF/CC. En este tipo de documento los RF deben inferirse de los peligros descritos (requiere auditoría con IA).</p>"; return; }
+  $("pre").innerHTML = "<ul>" + pre.map((r) => {
+    const items = [];
+    for (const p of r.patrones.slice(0, 4)) items.push(`<li>{${esc(p.ccs.join(", "))}} ×${p.veces} ${p.faltantes.length ? `<span class="chip NO">faltan ${esc(p.faltantes.join(", "))}</span>` : `<span class="chip SI">completo</span>`}</li>`);
+    for (const x of r.codigos_inexistentes.slice(0, 4)) items.push(`<li><span class="chip NO">código inexistente</span> ${esc(x.cc)} “${esc(x.nombre.slice(0, 70))}”${x.probable ? ` → ¿${esc(x.probable)}?` : ""} <span class="nota">(${esc(x.ubicacion)})</span></li>`);
+    for (const x of r.codigo_nombre_inconsistente.slice(0, 4)) items.push(`<li><span class="chip MAYOR">código/nombre</span> ${esc(x.cc)} “${esc(x.nombre.slice(0, 70))}” parece ${esc(x.probable)} <span class="nota">(${esc(x.ubicacion)})</span></li>`);
+    for (const x of r.formato_irregular) items.push(`<li><span class="chip MENOR">formato</span> “${esc(x.codigo)}” ×${x.veces}</li>`);
+    if (r.menciones_sin_controles && !r.patrones.length) items.push(`<li class="nota">${r.menciones_sin_controles} mención(es) sin controles críticos asociados</li>`);
+    return `<li><b>${esc(r.rf)} ${esc(r.nombre)}</b> · ${r.menciones} mención(es)<ul>${items.join("")}</ul></li>`;
+  }).join("") + "</ul>";
+}
+
+// ---------------------------------------------------------------- informe
+function terminar(inf) {
+  ultimoInforme = inf;
+  $("tituloProgreso").textContent = "Auditoría finalizada";
+  mostrar("barra", false); mostrar("btnDetener", false);
+  $("btnAuditar").disabled = $("btnPre").disabled = false;
+  pintarInforme(inf);
+  mostrar("panelInforme");
+  $("panelInforme").scrollIntoView({ behavior: "smooth" });
+}
+
+function pintarInforme(inf) {
+  const fecha = new Date(inf.fecha).toLocaleString("es-CL");
+  const ok = inf.veredicto === "HABILITA";
+  const html = [];
+  html.push(`<p class="nota">${esc(inf.archivo)} · ${esc(inf.tipo)} · ${esc(inf.cliente)} · ${fecha}</p>`);
+  html.push(`<div class="veredicto ${ok ? "si" : "no"}"><div class="grande">${ok ? "✔ HABILITA" : "✖ NO HABILITA"}</div><div><p><b>${esc(inf.motivo)}</b></p><p class="nota">Cobertura de controles críticos: ${inf.cobertura.controles_si}/${inf.cobertura.controles_total} (${inf.cobertura.porcentaje}%) · Hallazgos: ${inf.conteo.CRITICO} críticos, ${inf.conteo.MAYOR} mayores, ${inf.conteo.MENOR} menores</p></div></div>`);
+  if (inf.error) html.push(`<div class="error">${esc(inf.error)}</div>`);
+  if (inf.resumen) {
+    html.push(`<h3>Resumen ejecutivo</h3><p>${esc(inf.resumen.resumen_ejecutivo)}</p>`);
+    if (inf.resumen.limitaciones) html.push(`<p class="nota"><b>Limitaciones:</b> ${esc(inf.resumen.limitaciones)}</p>`);
+  }
+
+  html.push(`<h3>Controles críticos por riesgo de fatalidad</h3><p class="nota">Regla: un RF habilita la tarea solo si todos sus controles críticos están cubiertos (evaluación binaria).</p>`);
+  for (const r of inf.rfs) {
+    html.push(`<div class="rf"><header><b>${esc(r.rf)} · ${esc(r.nombre)}</b><span class="chip ${r.habilitado ? "SI" : "NO"}">${r.habilitado ? "HABILITADO" : "NO HABILITADO"}</span><span class="nota">${r.cumplidos}/${r.total}</span></header><div class="tabla"><table><thead><tr><th>Control</th><th>Estado</th><th>Fundamento y evidencia</th><th>Acción recomendada</th></tr></thead><tbody>`);
+    for (const c of r.controles) {
+      const clase = c.estado.replace(/\s/g, "");
+      html.push(`<tr><td><b>${esc(c.cc)}</b> ${esc(c.nombre)}</td><td><span class="chip ${clase}">${esc(c.estado)}</span>${c.estado === "NO" ? `<div class="nota">${esc(c.tipo_brecha.replace(/_/g, " ").toLowerCase())}</div>` : ""}</td><td>${esc(c.fundamento)}${c.cita ? `<div class="cita">“${esc(c.cita)}”</div>` : ""}</td><td>${esc(c.recomendacion)}</td></tr>`);
+    }
+    html.push(`</tbody></table></div></div>`);
+  }
+  if (!inf.rfs.length) html.push(`<p>No se identificaron riesgos de fatalidad evaluados.</p>`);
+  if (inf.rf_declarados_no_evaluados?.length) html.push(`<p class="nota"><b>RF mencionados en el documento pero no evaluados como aplicables:</b> ${esc(inf.rf_declarados_no_evaluados.join(", "))}. Ver limitaciones del resumen (p. ej. hojas de catálogo).</p>`);
+
+  html.push(`<h3>Hallazgos (${inf.hallazgos.length})</h3>`);
+  for (const h of inf.hallazgos) {
+    html.push(`<div class="hallazgo ${h.severidad}"><span class="chip ${h.severidad}">${h.severidad}</span> <b>${esc(h.categoria.replace(/_/g, " "))}</b>${h.rf ? ` · ${esc(h.rf)}` : ""}<div class="meta">${esc(h.ubicacion)}</div><div>${esc(h.descripcion)}</div>${h.cita ? `<div class="cita">“${esc(h.cita)}”</div>` : ""}${h.recomendacion ? `<div><b>Corrección:</b> ${esc(h.recomendacion)}</div>` : ""}</div>`);
+  }
+  if (!inf.hallazgos.length) html.push(`<p class="nota">Sin hallazgos registrados.</p>`);
+
+  html.push(`<h3>Checklist de verificación en terreno</h3><p class="nota">La herramienta audita el documento. La existencia real de los controles debe constatarse en terreno.</p><div class="tabla"><table class="check"><thead><tr><th></th><th>RF / Control</th><th>Qué verificar</th><th>Observación</th></tr></thead><tbody>`);
+  for (const r of inf.rfs) for (const c of r.controles) html.push(`<tr><td><span class="caja"></span></td><td><b>${esc(r.rf)} ${esc(c.cc)}</b> ${esc(c.nombre)}</td><td>${esc(c.terreno)}</td><td style="min-width:140px"></td></tr>`);
+  html.push(`</tbody></table></div>`);
+
+  html.push(`<footer class="pie">Marco de criterios v${esc(inf.marco)} (trazable a los códigos RF/CC de la guía SIGO-G-014). Modelo(s): ${esc(Object.keys(inf.uso.modelos || {}).join(", ") || "—")} · ${inf.uso.pasos} pasos · costo IA ≈ US$${inf.uso.usd} (${clp(inf.uso.usd)}). Herramienta de apoyo: no reemplaza el juicio del profesional de prevención ni la verificación en terreno.</footer>`);
+  $("informe").innerHTML = html.join("");
+}
+
+$("btnImprimir").onclick = () => window.print();
+$("btnJson").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(ultimoInforme, null, 2)], { type: "application/json" }));
+  a.download = `auditoria-${(ultimoInforme?.archivo || "documento").replace(/\.[^.]+$/, "")}.json`;
+  a.click();
+};
+$("btnNuevo").onclick = () => { mostrar("panelInforme", false); mostrar("panelPre", false); mostrar("panelProgreso", false); $("panelDocumento").scrollIntoView({ behavior: "smooth" }); };
+
+// Para pruebas automatizadas: permite pintar un informe sin llamar a la API.
+window.__pintarInforme = (inf) => { pintarInforme(inf); mostrar("panelInforme"); };
+</script>
+</body>
+</html>

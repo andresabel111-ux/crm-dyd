@@ -1,0 +1,5 @@
+{
+  "functions": {
+    "api/auditar.js": { "maxDuration": 300 }
+  }
+}

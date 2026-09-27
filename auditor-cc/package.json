@@ -1,0 +1,26 @@
+{
+  "name": "auditor-controles-criticos",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Auditor agéntico de documentos de prevención de riesgos contra controles críticos de riesgos de fatalidad.",
+  "scripts": {
+    "test": "node scripts/probar-local.js",
+    "probar-api": "node scripts/probar-api.js",
+    "vendor": "mkdir -p vendor && cp node_modules/xlsx/dist/xlsx.full.min.js node_modules/mammoth/mammoth.browser.min.js node_modules/pdfjs-dist/build/pdf.min.js node_modules/pdfjs-dist/build/pdf.worker.min.js vendor/",
+    "dev": "MOCK_IA=1 node scripts/servidor.js",
+    "dev:real": "node scripts/servidor.js",
+    "preanalisis": "node scripts/pre.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0"
+  },
+  "devDependencies": {
+    "mammoth": "^1.8.0",
+    "pdfjs-dist": "^3.11.174",
+    "xlsx": "^0.18.5"
+  }
+}
