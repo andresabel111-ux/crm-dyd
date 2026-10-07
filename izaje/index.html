@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#E8601C">
 <title>RF03 · Maniobras de Izaje</title>
+<link rel="manifest" href="/izaje/manifest.webmanifest">
+<link rel="icon" href="/izaje/icon-192.png">
+<link rel="apple-touch-icon" href="/izaje/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Izaje RF03">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -167,7 +172,7 @@ canvas#firma{width:100%;height:170px;border:1.5px dashed var(--border);border-ra
 
     <label class="chk"><input type="checkbox" id="decl"> <span>Declaro que la información y evidencias registradas son verídicas y fueron verificadas en terreno.</span></label>
     <label class="chk"><input type="checkbox" id="priv"> <span>Autorizo el tratamiento de mis datos (nombre, RUT, firma y ubicación) solo para el registro de seguridad de esta maniobra (Ley 21.719).</span></label>
-    <p class="note">Si no hay señal, el registro se guarda en el teléfono y se envía automáticamente al recuperar conexión.</p>
+    <p class="note">Si no hay señal, el registro se guarda en el teléfono y se envía automáticamente al recuperar conexión. <span id="offOk"></span></p>
   </section>
 </main>
 
@@ -433,6 +438,10 @@ window.addEventListener('resize', ()=>{ if(!signed) sizeSig(); });
 (function init(){
   try{ const p = JSON.parse(localStorage.getItem('izaje_perfil')||'null'); if(p){ ['nombre','rut','empresa','cargo','area','correos'].forEach(k=>{ if(p[k]) $(k).value=p[k]; }); if(p.rol) rol=p.rol; } }catch(e){}
   render(); setRol(rol); sizeSig(); net(); qBadge(); getGPS();
+  if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+    navigator.serviceWorker.register('/izaje/sw.js',{scope:'/izaje/'}).then(()=>navigator.serviceWorker.ready)
+      .then(()=>{ $('offOk').textContent='✔ App disponible sin señal en este teléfono.'; }).catch(()=>{});
+  }
   document.querySelectorAll('[data-r]').forEach(el=>el.addEventListener('input',()=>el.classList.remove('err')));
 })();
 </script>

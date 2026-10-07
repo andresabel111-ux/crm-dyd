@@ -14,6 +14,7 @@ const CONFIG = {
   FOLDER_ID: '',                        // vacío = se crea carpeta "RF03 Izaje - Evidencias"
   CC_FIJO: '',                          // correo(s) que siempre reciben copia, ej: 'prevencion@empresa.cl'
   ALERTA_NO_CONFORME: '',               // correo(s) extra que reciben SOLO los NO CONFORME
+  PANEL_KEY: 'panel-rf03-cambiar',      // clave de lectura del panel (distinta del TOKEN, que va visible en la app)
 };
 
 const H_INSP = ['Folio','Fecha','Hora','Rol','Nombre','RUT','Empresa','Cargo','Faena/Área','N° Plan','Equipo','ID Equipo',
@@ -21,8 +22,25 @@ const H_INSP = ['Folio','Fecha','Hora','Rol','Nombre','RUT','Empresa','Cargo','F
   'Observaciones','Carpeta evidencias','PDF','Enviado a','Recibido'];
 const H_DET = ['Folio','Fecha','Rol','Faena/Área','Equipo','Control','Título','Pregunta','Respuesta','Comentario','N° fotos','Fotos','Inspector'];
 
-function doGet() {
-  return json({ ok: true, app: 'RF03 Izaje', sheet: getSS().getUrl() });
+function doGet(e) {
+  const p = (e && e.parameter) || {};
+  if (p.accion !== 'datos') return json({ ok: true, app: 'RF03 Izaje' });
+  if (p.key !== CONFIG.PANEL_KEY) return json({ ok: false, error: 'Clave de panel inválida' });
+  const ss = getSS();
+  const sh = sheet(ss, 'Inspecciones', H_INSP);
+  const n = sh.getLastRow() - 1;
+  if (n < 1) return json({ ok: true, sheet: ss.getUrl(), rows: [] });
+  const rg = sh.getRange(2, 1, n, H_INSP.length);
+  const raw = rg.getValues(), disp = rg.getDisplayValues();
+  const iF = H_INSP.indexOf('Fecha'), iR = H_INSP.indexOf('Recibido');
+  const rows = disp.map((r, k) => {
+    const o = {};
+    H_INSP.forEach((h, j) => o[h] = r[j]);
+    const f = raw[k][iF] instanceof Date ? raw[k][iF] : raw[k][iR];
+    o._ts = f instanceof Date ? f.getTime() : null;
+    return o;
+  });
+  return json({ ok: true, sheet: ss.getUrl(), rows: rows });
 }
 
 function doPost(e) {
@@ -62,14 +80,18 @@ function doPost(e) {
     // 3) Planilla
     const gps = d.gps ? d.gps.lat + ',' + d.gps.lng + ' (±' + d.gps.acc + 'm)' : '';
     const r = {}; d.controles.forEach(c => r[c.codigo] = c.resp);
-    shI.appendRow([d.folio, d.fecha, d.hora, d.rol, d.nombre, d.rut, d.empresa, d.cargo, d.area, d.plan, d.equipo, d.equipoId,
+    const fecha = d.creado ? new Date(d.creado) : new Date();
+    shI.appendRow([d.folio, fecha, d.hora, d.rol, d.nombre, d.rut, d.empresa, d.cargo, d.area, d.plan, d.equipo, d.equipoId,
       d.carga, d.capacidad, d.desc, gps, d.resultado, (d.noConformes || []).join(', '),
       r.CCP1, r.CCP2, r.CCP3, r.CCP4, r.CCP5, r.CCM1, r.CCM2, d.obs, fd.getUrl(), pdfFile.getUrl(), d.correos, new Date()]);
     colorResultado(shI, shI.getLastRow(), d.resultado);
+    shI.getRange(shI.getLastRow(), 2).setNumberFormat('dd-MM-yyyy');
 
-    const rows = d.controles.map(c => [d.folio, d.fecha, d.rol, d.area, d.equipo, c.codigo, c.titulo, c.pregunta, c.resp, c.com,
+    const rows = d.controles.map(c => [d.folio, fecha, d.rol, d.area, d.equipo, c.codigo, c.titulo, c.pregunta, c.resp, c.com,
       imgs[c.codigo].length, imgs[c.codigo].map(x => x.url).join('\n'), d.nombre]);
-    shD.getRange(shD.getLastRow() + 1, 1, rows.length, H_DET.length).setValues(rows);
+    const r0 = shD.getLastRow() + 1;
+    shD.getRange(r0, 1, rows.length, H_DET.length).setValues(rows);
+    shD.getRange(r0, 2, rows.length, 1).setNumberFormat('dd-MM-yyyy');
 
     // 4) Correo
     const no = d.resultado === 'NO CONFORME';

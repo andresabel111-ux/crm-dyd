@@ -1,0 +1,8 @@
+{
+  "redirects": [
+    { "source": "/izaje", "destination": "/izaje/", "permanent": false }
+  ],
+  "headers": [
+    { "source": "/izaje/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+  ]
+}
