@@ -10,8 +10,8 @@
 
 const CONFIG = {
   TOKEN: 'izaje-rf03-cambiar',         // debe coincidir con TOKEN en index.html
-  SHEET_ID: '',                         // vacío = se crea "RF03 Izaje - Registro" automáticamente
-  FOLDER_ID: '',                        // vacío = se crea carpeta "RF03 Izaje - Evidencias"
+  SHEET_ID: '1mEJtG5IdoMfMWZSfafYK8BjG-Awu_1gafRQ27H4A9Lc',   // Drive: RF03 Izaje / RF03 Izaje - Registro
+  FOLDER_ID: '1xkAY9OvwHdOCwTO-HUDVfIaTpgijkMUp',             // Drive: RF03 Izaje / Evidencias
   CC_FIJO: '',                          // correo(s) que siempre reciben copia, ej: 'prevencion@empresa.cl'
   ALERTA_NO_CONFORME: '',               // correo(s) extra que reciben SOLO los NO CONFORME
   PANEL_KEY: 'panel-rf03-cambiar',      // clave de lectura del panel (distinta del TOKEN, que va visible en la app)
