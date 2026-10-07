@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#E8601C">
 <title>RF03 · Maniobras de Izaje</title>
-<link rel="manifest" href="/izaje/manifest.webmanifest">
-<link rel="icon" href="/izaje/icon-192.png">
-<link rel="apple-touch-icon" href="/izaje/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Izaje RF03">
 <style>
@@ -439,7 +439,7 @@ window.addEventListener('resize', ()=>{ if(!signed) sizeSig(); });
   try{ const p = JSON.parse(localStorage.getItem('izaje_perfil')||'null'); if(p){ ['nombre','rut','empresa','cargo','area','correos'].forEach(k=>{ if(p[k]) $(k).value=p[k]; }); if(p.rol) rol=p.rol; } }catch(e){}
   render(); setRol(rol); sizeSig(); net(); qBadge(); getGPS();
   if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
-    navigator.serviceWorker.register('/izaje/sw.js',{scope:'/izaje/'}).then(()=>navigator.serviceWorker.ready)
+    navigator.serviceWorker.register('sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready)
       .then(()=>{ $('offOk').textContent='✔ App disponible sin señal en este teléfono.'; }).catch(()=>{});
   }
   document.querySelectorAll('[data-r]').forEach(el=>el.addEventListener('input',()=>el.classList.remove('err')));
