@@ -365,7 +365,7 @@ async function flushQueue(manual){
   let sent = 0, fail = '';
   try{
     for(const p of await qAll()){
-      try{ await post(p); await qDel(p.folio); sent++; } catch(e){ fail = e.message; }
+      try{ await post({...p, token: TOKEN}); await qDel(p.folio); sent++; } catch(e){ fail = e.message; }
     }
   } finally { flushing = false; qBadge(); }
   if(manual) modal(fail?'⚠️':'✅', fail?'Quedan pendientes':'Cola enviada', fail?`Enviados: ${sent}. Error: ${fail}`:`Se enviaron ${sent} registro(s) pendiente(s).`, true);

@@ -1,7 +1,7 @@
 // Service worker RF03 Izaje: la app abre sin señal.
 // Al publicar cambios en index.html, sube VERSION para forzar la actualización.
 // Rutas relativas: funciona tanto en la raíz de un dominio como bajo /izaje/.
-const VERSION = 'izaje-v3';
+const VERSION = 'izaje-v4';
 const BASE = new URL('./', self.location).href;          // ej: https://x.vercel.app/ o .../izaje/
 const SHELL = ['./', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'].map(p => new URL(p, BASE).href);
 
