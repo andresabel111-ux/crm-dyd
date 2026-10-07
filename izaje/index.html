@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#E8601C">
+<title>RF03 · Maniobras de Izaje</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Izaje RF03">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --orange:#E8601C;--orange-dim:#FDEBE1;--amber:#F2A007;--amber-dim:#FEF4DC;
+  --navy:#26355D;--bg:#F3F4F7;--card:#FFFFFF;--border:#DDE1E8;--text:#1D2433;--muted:#667085;
+  --ok:#16A34A;--ok-dim:#DCFCE7;--bad:#DC2626;--bad-dim:#FEE2E2;--na:#64748B;--na-dim:#E2E8F0;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:110px}
+header{background:var(--navy);color:#fff;padding:14px 16px calc(14px);padding-top:calc(14px + env(safe-area-inset-top,0));position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:760px;margin:0 auto}
+.rf{background:var(--orange);font-weight:800;font-size:13px;padding:3px 10px;border-radius:0 0 10px 0;letter-spacing:.04em}
+.ttl{font-weight:800;font-size:18px;letter-spacing:-.01em;margin-top:4px}
+.pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.pill{font-size:11px;font-weight:700;padding:4px 9px;border-radius:99px;background:rgba(255,255,255,.14);white-space:nowrap}
+.pill.on{background:#16A34A}.pill.off{background:#DC2626}.pill.q{background:var(--amber);color:#1D2433;cursor:pointer}
+.prog{height:5px;background:rgba(255,255,255,.18);border-radius:9px;margin:10px auto 0;max-width:760px;overflow:hidden}
+.prog>div{height:100%;background:var(--orange);width:0;transition:width .25s}
+main{max-width:760px;margin:0 auto;padding:14px 12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}
+.sec{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px;color:#fff;background:var(--orange);margin:-16px -16px 14px;padding:10px 16px;border-radius:13px 13px 0 0}
+.sec.sup{background:var(--amber)}.sec.nv{background:var(--navy)}
+label.l{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:10px 0 4px}
+input[type=text],input[type=email],input[type=number],input[type=date],input[type=time],select,textarea{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;background:#fff;color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--orange)}
+textarea{resize:vertical;min-height:64px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+@media(max-width:520px){.g2{grid-template-columns:1fr}}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{font:inherit;font-weight:800;padding:13px;border-radius:10px;border:2px solid var(--border);background:#fff;color:var(--muted);cursor:pointer}
+.seg button.act.t{border-color:var(--orange);background:var(--orange-dim);color:var(--orange)}
+.seg button.act.s{border-color:var(--amber);background:var(--amber-dim);color:#9A6500}
+.btn{font:inherit;font-weight:800;border:none;border-radius:11px;padding:14px 16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.pri{background:var(--orange);color:#fff;width:100%;font-size:16px}
+.btn.pri:disabled{opacity:.5}
+.btn.sec2{background:#fff;border:1.5px solid var(--border);color:var(--text)}
+.btn.sm{padding:9px 12px;font-size:13px}
+.gps{display:flex;gap:8px;align-items:center;margin-top:6px;font-size:13px;color:var(--muted)}
+/* controles */
+.cc{border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;transition:border-color .2s,background .2s}
+.cc.si{border-color:var(--ok);background:#F6FEF9}.cc.no{border-color:var(--bad);background:#FFF7F7}.cc.na{border-color:var(--na)}
+.cc-h{display:flex;gap:10px;align-items:flex-start}
+.code{flex:none;font-weight:800;font-size:12px;color:#fff;background:var(--navy);padding:4px 8px;border-radius:7px}
+.code.m{background:#7C3AED}
+.cc-t{font-weight:800;font-size:14px}
+.cc-q{margin:8px 0 12px;font-size:15px}
+.ans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ans button{font:inherit;font-weight:800;font-size:15px;padding:13px 4px;border-radius:10px;border:2px solid var(--border);background:#fff;color:var(--muted);cursor:pointer}
+.ans button.a-si.act{background:var(--ok);border-color:var(--ok);color:#fff}
+.ans button.a-no.act{background:var(--bad);border-color:var(--bad);color:#fff}
+.ans button.a-na.act{background:var(--na);border-color:var(--na);color:#fff}
+.req{font-size:12px;color:var(--bad);font-weight:700;margin-top:6px;display:none}
+.req.show{display:block}
+.ph-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.ph-add{position:relative;overflow:hidden}
+.ph-add input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.th{position:relative;width:74px;height:74px;border-radius:9px;overflow:hidden;border:1px solid var(--border)}
+.th img{width:100%;height:100%;object-fit:cover}
+.th button{position:absolute;top:2px;right:2px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,.65);color:#fff;font-weight:800;cursor:pointer}
+.stop{display:none;background:var(--bad);color:#fff;border-radius:12px;padding:14px 16px;margin-bottom:12px;font-weight:700}
+.stop.show{display:block}
+.stop b{display:block;font-size:17px;font-weight:900;margin-bottom:4px}
+.ok-b{display:none;background:var(--ok);color:#fff;border-radius:12px;padding:12px 16px;margin-bottom:12px;font-weight:700}
+.ok-b.show{display:block}
+canvas#firma{width:100%;height:170px;border:1.5px dashed var(--border);border-radius:10px;background:#fff;touch-action:none;display:block}
+.chk{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px}
+.chk input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--orange)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.foot{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--border);padding:10px 12px calc(10px + env(safe-area-inset-bottom,0));z-index:40}
+.foot>div{max-width:760px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.foot .stat{font-size:12px;color:var(--muted);flex:none;text-align:center;min-width:64px}
+.foot .stat b{display:block;font-size:18px;color:var(--text)}
+.ov{position:fixed;inset:0;background:rgba(16,22,40,.6);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+.ov.show{display:flex}
+.mod{background:#fff;border-radius:16px;padding:22px;max-width:420px;width:100%;text-align:center}
+.mod h3{font-size:19px;margin:8px 0}
+.mod p{color:var(--muted);font-size:14px;margin-bottom:14px;word-break:break-word}
+.ico{font-size:44px}
+.spin{width:44px;height:44px;border:5px solid var(--orange-dim);border-top-color:var(--orange);border-radius:50%;animation:sp 1s linear infinite;margin:0 auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+.err{border-color:var(--bad)!important}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hrow">
+    <div>
+      <span class="rf">RF 03</span>
+      <div class="ttl">Maniobras de Izaje</div>
+    </div>
+    <div class="pills">
+      <span id="pNet" class="pill on">● En línea</span>
+      <span id="pQ" class="pill q" style="display:none" onclick="flushQueue(true)">⏳ 0 pendientes</span>
+    </div>
+  </div>
+  <div class="prog"><div id="bar"></div></div>
+</header>
+
+<main>
+  <!-- 1. DATOS -->
+  <section class="card">
+    <div class="sec nv">1 · Datos de la maniobra</div>
+
+    <label class="l">Rol de quien verifica</label>
+    <div class="seg">
+      <button type="button" id="rT" class="t act" onclick="setRol('Trabajador')">👷 Trabajador/a</button>
+      <button type="button" id="rS" class="s" onclick="setRol('Supervisor')">🦺 Supervisor/a</button>
+    </div>
+
+    <div class="g2">
+      <div><label class="l">Nombre completo *</label><input type="text" id="nombre" autocomplete="name" data-r></div>
+      <div><label class="l">RUT *</label><input type="text" id="rut" placeholder="12.345.678-9" data-r></div>
+      <div><label class="l">Empresa *</label><input type="text" id="empresa" data-r></div>
+      <div><label class="l">Cargo / Función</label><input type="text" id="cargo" placeholder="Operador, Rigger, Supervisor…"></div>
+      <div><label class="l">Faena / Área *</label><input type="text" id="area" data-r></div>
+      <div><label class="l">N° Plan de izaje</label><input type="text" id="plan"></div>
+      <div><label class="l">Tipo de equipo *</label>
+        <select id="equipo" data-r>
+          <option value="">Seleccionar…</option>
+          <option>Grúa móvil (telescópica)</option>
+          <option>Grúa horquilla / Manipulador telescópico</option>
+          <option>Camión pluma / Grúa articulada</option>
+          <option>Grúa torre</option>
+          <option>Puente grúa / Monorriel</option>
+          <option>Tecle / Polipasto</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div><label class="l">ID / Patente equipo *</label><input type="text" id="equipoId" data-r></div>
+      <div><label class="l">Peso de la carga (t)</label><input type="number" id="carga" step="0.01" inputmode="decimal"></div>
+      <div><label class="l">% Capacidad según tabla</label><input type="number" id="capacidad" step="1" inputmode="numeric" placeholder="Ej: 65"></div>
+    </div>
+    <label class="l">Descripción de la maniobra *</label>
+    <textarea id="desc" placeholder="Qué se iza, desde dónde hacia dónde" data-r></textarea>
+
+    <label class="l">Ubicación GPS</label>
+    <div class="gps"><button type="button" class="btn sec2 sm" onclick="getGPS()">📍 Capturar</button><span id="gpsTxt">Sin capturar</span></div>
+
+    <label class="l">Enviar informe a (correos, separados por coma) *</label>
+    <input type="email" id="correos" multiple placeholder="supervisor@empresa.cl, prevencion@empresa.cl" data-r>
+  </section>
+
+  <!-- 2. CONTROLES -->
+  <section class="card">
+    <div class="sec" id="secCtl">2 · Controles críticos — Trabajador/a</div>
+    <div id="stop" class="stop"><b>⛔ DETENER — NO INICIAR LA MANIOBRA</b><span id="stopTxt"></span></div>
+    <div id="okb" class="ok-b">✅ Todos los controles críticos verificados. Maniobra autorizada a iniciar.</div>
+    <div id="ctls"></div>
+  </section>
+
+  <!-- 3. CIERRE -->
+  <section class="card">
+    <div class="sec nv">3 · Cierre y firma</div>
+    <label class="l">Observaciones generales / acciones correctivas</label>
+    <textarea id="obs"></textarea>
+
+    <label class="l">Firma *</label>
+    <canvas id="firma"></canvas>
+    <div style="text-align:right;margin-top:6px"><button type="button" class="btn sec2 sm" onclick="clearSig()">Borrar firma</button></div>
+
+    <label class="chk"><input type="checkbox" id="decl"> <span>Declaro que la información y evidencias registradas son verídicas y fueron verificadas en terreno.</span></label>
+    <label class="chk"><input type="checkbox" id="priv"> <span>Autorizo el tratamiento de mis datos (nombre, RUT, firma y ubicación) solo para el registro de seguridad de esta maniobra (Ley 21.719).</span></label>
+    <p class="note">Si no hay señal, el registro se guarda en el teléfono y se envía automáticamente al recuperar conexión. <span id="offOk"></span></p>
+  </section>
+</main>
+
+<div class="foot"><div>
+  <div class="stat"><b id="cnt">0/7</b>controles</div>
+  <button class="btn pri" id="btnSend" onclick="enviar()">Enviar registro</button>
+</div></div>
+
+<div class="ov" id="ov"><div class="mod" id="mod"></div></div>
+
+<script>
+/* ================= CONFIGURACIÓN ================= */
+// Pega aquí la URL del Web App de Google Apps Script (termina en /exec) y el mismo TOKEN de Code.gs
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyDhZYywBgDc8GVUFqnR_2HvcN8pHnrlJteL6I2SitcsFAK0UFc7JQXSc7Oe_pTfNVV/exec';
+const TOKEN   = 'izaje-a4pjbkgub4';
+const MAX_FOTOS = 4;        // por control
+const FOTO_MAX_PX = 1600;   // lado mayor tras compresión
+const FOTO_OBLIGATORIA = 'NO'; // 'NO' = foto obligatoria solo si responde No | 'TODAS' = en cada control respondido Sí/No
+/* ================================================= */
+
+const CONTROLES = [
+  {c:'CCP1',t:'Equipos y elementos de izaje conforme a especificaciones técnicas',
+   T:'Antes de iniciar la maniobra, ¿he verificado visualmente que el equipo y los elementos de izaje no tienen daños evidentes y he confirmado que su inspección de pre-uso está vigente y aprobada?',
+   S:'¿He verificado que todos los equipos de izaje y aparejos a mi cargo tienen su programa de mantenimiento y certificaciones al día, y que mi personal ha realizado y documentado correctamente las inspecciones de pre-uso antes de iniciar la maniobra?'},
+  {c:'CCP2',t:'Estabilizadores operativos y posicionamiento seguro de equipos de izaje móviles',
+   T:'¿He verificado que el equipo está posicionado en terreno firme y nivelado, con todos sus estabilizadores completamente extendidos y apoyados, y que los indicadores de estabilidad del equipo marcan una condición segura?',
+   S:'¿He verificado que el lugar de emplazamiento del equipo es competente para la maniobra planificada, que la instalación de los estabilizadores se hizo correctamente, y que se han considerado las condiciones del viento antes de autorizar el inicio del izaje?'},
+  {c:'CCP3',t:'Personal acreditado para maniobras de izaje',
+   T:'¿Cuento con mi acreditación vigente para este equipo (operador) y esta maniobra (rigger), y declaro estar en óptimas condiciones físicas y mentales para realizar el trabajo de forma segura hoy?',
+   S:'¿He verificado que las credenciales de todo el personal involucrado en el izaje están vigentes y corresponden al equipo y carga, y he confirmado visualmente que se encuentran en condiciones adecuadas para la tarea?'},
+  {c:'CCP4',t:'Comunicación bidireccional efectiva entre operador y rigger',
+   T:'Antes de mover la carga, ¿he realizado una prueba de comunicación con mi compañero por el canal de radio acordado y he confirmado que ambos entendemos las señales que usaremos?',
+   S:'¿He verificado que el equipo de izaje cuenta con un sistema de comunicación funcional, que el operador y el rigger han realizado las pruebas de comunicación, y que existe un protocolo claro sobre cómo actuar si se pierde el contacto?'},
+  {c:'CCP5',t:'Plan de Izaje',
+   T:'Antes de realizar la maniobra ¿he participado en la difusión del plan de izaje para esta maniobra específica, entendiendo mi rol, los pasos a seguir, los riesgos y las comunicaciones definidas en él?',
+   S:'¿He verificado que existe un plan de izaje aprobado para esta maniobra, que todo el equipo lo conoce, y que las condiciones reales en terreno (carga, equipo, entorno) coinciden exactamente con lo estipulado en ese plan?'},
+  {c:'CCM1',t:'Segregación y control de acceso en área de maniobras',
+   T:'¿He verificado que la segregación del área de izaje fue instalada según lo definido en el plan, cubriendo todo el radio de giro y he establecido un control de acceso efectivo para impedir el ingreso de personal no autorizado?',
+   S:'¿He verificado que el área de la maniobra está completamente delimitada con barreras físicas y señalizada y confirmo que ninguna persona ajena a la tarea está dentro del perímetro de seguridad?'},
+  {c:'CCM2',t:'Capacidad de respuesta ante emergencia',
+   T:'¿Conozco la ubicación y he realizado la prueba funcional de los sistemas de parada de emergencia de mi equipo, y sé a quién y por qué canal debo llamar para activar el plan de rescate?',
+   S:'¿He verificado que los sistemas de parada de emergencia de los equipos están operativos, que el personal sabe cómo activarlos, y que el plan de rescate específico para la maniobra de hoy es conocido por mi equipo y la brigada?'}
+];
+
+let rol = 'Trabajador';
+let gps = null;
+let state = CONTROLES.map(() => ({resp:'', com:'', fotos:[]})); // fotos: [{name,type,data(dataURL)}]
+const $ = id => document.getElementById(id);
+
+/* ---------- Render de controles ---------- */
+function render(){
+  $('ctls').innerHTML = CONTROLES.map((k,i)=>`
+    <div class="cc" id="cc${i}">
+      <div class="cc-h"><span class="code ${k.c.startsWith('CCM')?'m':''}">${k.c}</span><div class="cc-t">${k.t}</div></div>
+      <div class="cc-q" id="q${i}">${rol==='Trabajador'?k.T:k.S}</div>
+      <div class="ans">
+        <button type="button" class="a-si" onclick="resp(${i},'SI')">SÍ</button>
+        <button type="button" class="a-no" onclick="resp(${i},'NO')">NO</button>
+        <button type="button" class="a-na" onclick="resp(${i},'N/A')">N/A</button>
+      </div>
+      <textarea id="com${i}" placeholder="Comentario / hallazgo / acción tomada" style="margin-top:10px" oninput="state[${i}].com=this.value;check()"></textarea>
+      <div class="req" id="req${i}"></div>
+      <div class="ph-row" id="ph${i}"></div>
+    </div>`).join('');
+  CONTROLES.forEach((_,i)=>{ paintCtl(i); $('com'+i).value = state[i].com; });
+  check();
+}
+function paintCtl(i){
+  const s = state[i], el = $('cc'+i);
+  el.className = 'cc' + (s.resp==='SI'?' si':s.resp==='NO'?' no':s.resp==='N/A'?' na':'');
+  el.querySelectorAll('.ans button').forEach(b=>{
+    const v = b.classList.contains('a-si')?'SI':b.classList.contains('a-no')?'NO':'N/A';
+    b.classList.toggle('act', v===s.resp);
+  });
+  const row = $('ph'+i);
+  row.innerHTML = s.fotos.map((f,j)=>`<div class="th"><img src="${f.data}"><button type="button" onclick="delFoto(${i},${j})">×</button></div>`).join('') +
+    (s.fotos.length < MAX_FOTOS ? `<label class="btn sec2 sm ph-add">📷 Evidencia (${s.fotos.length}/${MAX_FOTOS})<input type="file" accept="image/*" capture="environment" multiple onchange="addFotos(${i},this)"></label>` : '');
+}
+function setRol(r){
+  rol = r;
+  $('rT').classList.toggle('act', r==='Trabajador');
+  $('rS').classList.toggle('act', r==='Supervisor');
+  const sc = $('secCtl');
+  sc.textContent = '2 · Controles críticos — ' + (r==='Trabajador'?'Trabajador/a':'Supervisor/a');
+  sc.className = 'sec' + (r==='Supervisor'?' sup':'');
+  CONTROLES.forEach((k,i)=>{ $('q'+i).textContent = r==='Trabajador'?k.T:k.S; });
+}
+function resp(i,v){ state[i].resp = v; paintCtl(i); check(); }
+function delFoto(i,j){ state[i].fotos.splice(j,1); paintCtl(i); check(); }
+
+/* ---------- Validación por control ---------- */
+function ctlError(i){
+  const s = state[i];
+  if(!s.resp) return 'Falta respuesta';
+  if((s.resp==='NO'||s.resp==='N/A') && s.com.trim().length<5) return s.resp==='NO' ? 'Describe el hallazgo y la acción tomada' : 'Justifica por qué no aplica';
+  const needFoto = (FOTO_OBLIGATORIA==='TODAS' && s.resp!=='N/A') || s.resp==='NO';
+  if(needFoto && !s.fotos.length) return 'Adjunta al menos 1 foto de evidencia';
+  return '';
+}
+function check(){
+  let done = 0; const nos = [];
+  state.forEach((s,i)=>{
+    if(s.resp) done++;
+    if(s.resp==='NO') nos.push(CONTROLES[i].c);
+    const e = s.resp ? ctlError(i) : '';
+    const r = $('req'+i); if(r){ r.textContent = e ? '⚠ '+e : ''; r.classList.toggle('show', !!e); }
+  });
+  $('cnt').textContent = done+'/'+CONTROLES.length;
+  $('bar').style.width = (done/CONTROLES.length*100)+'%';
+  $('stop').classList.toggle('show', nos.length>0);
+  $('stopTxt').textContent = nos.length ? 'Control(es) no verificado(s): '+nos.join(', ')+'. Corrige la desviación y vuelve a verificar antes de mover la carga.' : '';
+  $('okb').classList.toggle('show', done===CONTROLES.length && nos.length===0);
+}
+
+/* ---------- Fotos: compresión + sello de agua ---------- */
+async function addFotos(i, input){
+  const files = [...input.files]; input.value = '';
+  for(const f of files){
+    if(state[i].fotos.length >= MAX_FOTOS) break;
+    try{
+      const data = await compress(f, CONTROLES[i].c);
+      state[i].fotos.push({name:`${CONTROLES[i].c}_${state[i].fotos.length+1}.jpg`, type:'image/jpeg', data});
+    }catch(e){ alert('No se pudo procesar la imagen: '+e.message); }
+  }
+  paintCtl(i); check();
+}
+function compress(file, code){
+  return new Promise((res,rej)=>{
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = ()=>{
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const k = Math.min(1, FOTO_MAX_PX/Math.max(w,h)); w = Math.round(w*k); h = Math.round(h*k);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d'); x.drawImage(img,0,0,w,h);
+      // Sello: control + fecha/hora + GPS (trazabilidad de evidencia)
+      const fs = Math.max(14, Math.round(w/45));
+      const txt = `RF03 ${code} · ${new Date().toLocaleString('es-CL')}` + (gps?` · ${gps.lat.toFixed(5)},${gps.lng.toFixed(5)}`:'');
+      x.font = `bold ${fs}px sans-serif`;
+      x.fillStyle = 'rgba(0,0,0,.55)'; x.fillRect(0, h-fs*1.8, w, fs*1.8);
+      x.fillStyle = '#fff'; x.fillText(txt, fs*.6, h-fs*.6);
+      URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg', 0.72));
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); rej(new Error('formato no soportado')); };
+    img.src = url;
+  });
+}
+
+/* ---------- GPS ---------- */
+function getGPS(){
+  if(!navigator.geolocation){ $('gpsTxt').textContent='GPS no disponible'; return; }
+  $('gpsTxt').textContent = 'Obteniendo…';
+  navigator.geolocation.getCurrentPosition(p=>{
+    gps = {lat:p.coords.latitude, lng:p.coords.longitude, acc:Math.round(p.coords.accuracy)};
+    $('gpsTxt').textContent = `${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)} (±${gps.acc} m)`;
+  }, e=>{ $('gpsTxt').textContent = 'No se pudo obtener ('+e.message+')'; }, {enableHighAccuracy:true, timeout:15000, maximumAge:60000});
+}
+
+/* ---------- Firma ---------- */
+const cv = $('firma'), cx = cv.getContext('2d'); let drawing = false, signed = false;
+function sizeSig(){ const r = cv.getBoundingClientRect(), d = window.devicePixelRatio||1; cv.width = r.width*d; cv.height = r.height*d; cx.scale(d,d); cx.lineWidth = 2.4; cx.lineCap='round'; cx.strokeStyle='#1D2433'; signed=false; }
+function pos(e){ const r = cv.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}; }
+cv.addEventListener('pointerdown', e=>{ drawing=true; const p=pos(e); cx.beginPath(); cx.moveTo(p.x,p.y); cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove', e=>{ if(!drawing) return; const p=pos(e); cx.lineTo(p.x,p.y); cx.stroke(); signed=true; });
+['pointerup','pointercancel'].forEach(t=>cv.addEventListener(t,()=>drawing=false));
+function clearSig(){ cx.clearRect(0,0,cv.width,cv.height); signed=false; }
+
+/* ---------- Cola offline (IndexedDB) ---------- */
+function db(){ return new Promise((res,rej)=>{ const r = indexedDB.open('izaje_rf03',1); r.onupgradeneeded=()=>r.result.createObjectStore('q',{keyPath:'folio'}); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function qOp(mode, fn){ const d = await db(); return new Promise((res,rej)=>{ const t = d.transaction('q',mode); const req = fn(t.objectStore('q')); t.oncomplete=()=>res(req&&req.result); t.onerror=()=>rej(t.error); }); }
+const qPut = p => qOp('readwrite', s=>s.put(p));
+const qDel = f => qOp('readwrite', s=>s.delete(f));
+const qAll = () => qOp('readonly', s=>s.getAll());
+async function qBadge(){ try{ const n = (await qAll()).length; $('pQ').style.display = n?'':'none'; $('pQ').textContent = `⏳ ${n} pendiente${n>1?'s':''}`; }catch(e){} }
+
+async function post(payload){
+  if(!/^https:\/\/script\.google\.com\//.test(GAS_URL)) throw new Error('GAS_URL no configurada');
+  const ctrl = new AbortController(), t = setTimeout(()=>ctrl.abort(), 120000);
+  try{
+    // text/plain evita el preflight CORS de Apps Script
+    const r = await fetch(GAS_URL, {method:'POST', body:JSON.stringify(payload), signal:ctrl.signal});
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error||'Error en servidor');
+    return j;
+  } finally { clearTimeout(t); }
+}
+let flushing = false;
+async function flushQueue(manual){
+  if(flushing || !navigator.onLine) return; flushing = true;
+  let sent = 0, fail = '';
+  try{
+    for(const p of await qAll()){
+      try{ await post({...p, token: TOKEN}); await qDel(p.folio); sent++; } catch(e){ fail = e.message; }
+    }
+  } finally { flushing = false; qBadge(); }
+  if(manual) modal(fail?'⚠️':'✅', fail?'Quedan pendientes':'Cola enviada', fail?`Enviados: ${sent}. Error: ${fail}`:`Se enviaron ${sent} registro(s) pendiente(s).`, true);
+}
+
+/* ---------- Envío ---------- */
+function folio(){ const d = new Date(), p = n=>String(n).padStart(2,'0'); return `RF03-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}-${Math.random().toString(36).slice(2,6).toUpperCase()}`; }
+function validRut(r){ r = r.replace(/[.\-\s]/g,'').toUpperCase(); if(!/^\d{7,8}[0-9K]$/.test(r)) return false; let s=0,m=2; for(let i=r.length-2;i>=0;i--){ s+= +r[i]*m; m = m===7?2:m+1; } const dv = 11-(s%11); return (dv===11?'0':dv===10?'K':String(dv))===r.slice(-1); }
+
+async function enviar(){
+  const errs = [];
+  document.querySelectorAll('[data-r]').forEach(el=>{ const bad = !el.value.trim(); el.classList.toggle('err',bad); if(bad) errs.push(el); });
+  if(errs.length) return fail('Completa los datos obligatorios de la maniobra.', errs[0]);
+  if(!validRut($('rut').value)){ $('rut').classList.add('err'); return fail('RUT inválido.', $('rut')); }
+  const mails = $('correos').value.split(/[,;\s]+/).filter(Boolean);
+  if(!mails.every(m=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m))){ $('correos').classList.add('err'); return fail('Revisa los correos de destino.', $('correos')); }
+  const bad = state.findIndex((_,i)=>ctlError(i));
+  if(bad>-1) return fail(`${CONTROLES[bad].c}: ${ctlError(bad)}.`, $('cc'+bad));
+  if(!signed) return fail('Falta la firma.', cv);
+  if(!$('decl').checked || !$('priv').checked) return fail('Debes aceptar la declaración y la autorización de datos.', $('decl'));
+
+  const nos = state.map((s,i)=>s.resp==='NO'?CONTROLES[i].c:null).filter(Boolean);
+  const now = new Date();
+  const payload = {
+    token: TOKEN, folio: folio(), creado: now.toISOString(),
+    fecha: now.toLocaleDateString('es-CL'), hora: now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}),
+    rol, nombre:$('nombre').value.trim(), rut:$('rut').value.trim(), empresa:$('empresa').value.trim(), cargo:$('cargo').value.trim(),
+    area:$('area').value.trim(), plan:$('plan').value.trim(), equipo:$('equipo').value, equipoId:$('equipoId').value.trim(),
+    carga:$('carga').value, capacidad:$('capacidad').value, desc:$('desc').value.trim(), gps,
+    correos: mails.join(','), obs:$('obs').value.trim(),
+    resultado: nos.length ? 'NO CONFORME' : 'CONFORME', noConformes: nos,
+    controles: CONTROLES.map((k,i)=>({codigo:k.c, titulo:k.t, pregunta: rol==='Trabajador'?k.T:k.S, resp:state[i].resp, com:state[i].com.trim(),
+      fotos: state[i].fotos.map(f=>({name:f.name, type:f.type, data:f.data.split(',')[1]})) })),
+    firma: cv.toDataURL('image/png').split(',')[1],
+    ua: navigator.userAgent
+  };
+
+  try{ localStorage.setItem('izaje_perfil', JSON.stringify({nombre:payload.nombre,rut:payload.rut,empresa:payload.empresa,cargo:payload.cargo,area:payload.area,correos:payload.correos,rol})); }catch(e){}
+
+  $('btnSend').disabled = true;
+  modal('<div class="spin"></div>','Enviando…','Subiendo evidencias, generando PDF y registrando en planilla. No cierres la app.', false);
+  try{
+    const j = await post(payload);
+    modal('✅','Registro enviado',`Folio <b>${payload.folio}</b><br>Resultado: <b style="color:${nos.length?'#DC2626':'#16A34A'}">${payload.resultado}</b><br>Informe enviado a ${payload.correos}.`, true, true);
+  }catch(e){
+    try{ await qPut(payload); await qBadge();
+      modal('📥','Guardado sin conexión',`Folio <b>${payload.folio}</b> quedó en el teléfono y se enviará automáticamente al recuperar señal.<br><small>(${e.message})</small>`, true, true);
+    }catch(e2){ modal('❌','No se pudo guardar', e.message+' / '+e2.message, true); }
+  } finally { $('btnSend').disabled = false; }
+}
+function fail(msg, el){ modal('⚠️','Revisa el formulario',msg,true); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); }
+function modal(icon, title, body, closable, reset){
+  $('mod').innerHTML = `<div class="ico">${icon}</div><h3>${title}</h3><p>${body}</p>` +
+    (closable ? `<button class="btn pri" onclick="closeModal(${!!reset})">${reset?'Nuevo registro':'Entendido'}</button>` : '');
+  $('ov').classList.add('show');
+}
+function closeModal(reset){ $('ov').classList.remove('show'); if(reset) nuevo(); }
+function nuevo(){
+  state = CONTROLES.map(()=>({resp:'',com:'',fotos:[]}));
+  ['plan','equipoId','carga','capacidad','desc','obs'].forEach(id=>$(id).value='');
+  $('equipo').value=''; $('decl').checked=false; clearSig(); render(); window.scrollTo({top:0,behavior:'smooth'}); getGPS();
+}
+
+/* ---------- Estado de red ---------- */
+function net(){ const on = navigator.onLine; $('pNet').className = 'pill '+(on?'on':'off'); $('pNet').textContent = on?'● En línea':'● Sin señal'; if(on) flushQueue(false); }
+window.addEventListener('online', net); window.addEventListener('offline', net);
+window.addEventListener('resize', ()=>{ if(!signed) sizeSig(); });
+
+/* ---------- Init ---------- */
+(function init(){
+  try{ const p = JSON.parse(localStorage.getItem('izaje_perfil')||'null'); if(p){ ['nombre','rut','empresa','cargo','area','correos'].forEach(k=>{ if(p[k]) $(k).value=p[k]; }); if(p.rol) rol=p.rol; } }catch(e){}
+  render(); setRol(rol); sizeSig(); net(); qBadge(); getGPS();
+  if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost')){
+    navigator.serviceWorker.register('sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready)
+      .then(()=>{ $('offOk').textContent='✔ App disponible sin señal en este teléfono.'; }).catch(()=>{});
+  }
+  document.querySelectorAll('[data-r]').forEach(el=>el.addEventListener('input',()=>el.classList.remove('err')));
+})();
+</script>
+</body>
+</html>
